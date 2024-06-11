@@ -83,7 +83,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "8722ecb05ad95dd85232f9887434b95a8604b84f"
+      resolved-ref: "755944d61ad61a81340b716a0e32413d1441b6fe"
       url: "git@github.com:AndreiLosev/plcart_debug_server_utils.git"
     source: git
     version: "1.0.0"
