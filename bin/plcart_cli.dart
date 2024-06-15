@@ -24,10 +24,12 @@ void main(List<String> arguments) async {
   await Future.delayed(const Duration(seconds: 5));
   client.write(ClientCommand(
       CommandKind.unsubscribeTask, SimplePayload({'value': "TestTask2"})));
+
+  await client.disconnect();
 }
 
 Future<void> listen(Client client, Stopwatch t) async {
-  while (true) {
+  while (client.isConnected()) {
     final res = await client.read();
     print({res.responseStatus: res.message, 't': t.elapsed});
   }

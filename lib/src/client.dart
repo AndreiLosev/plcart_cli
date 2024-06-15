@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:future_soket/future_soket.dart';
@@ -8,7 +7,6 @@ import 'package:future_soket/future_soket.dart';
 class Client {
   final String host;
   late FutureSoket _socket;
-  StreamSubscription<Uint8List>? _subscription;
 
   Client(this.host);
 
@@ -33,8 +31,8 @@ class Client {
 
 
   Future<void> disconnect() async {
-    _subscription?.cancel();
-    _subscription = null;
     await _socket.disconnect();
   }
+
+  bool isConnected() => _socket.isConnected();
 }
