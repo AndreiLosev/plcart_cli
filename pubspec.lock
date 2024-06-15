@@ -83,7 +83,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "755944d61ad61a81340b716a0e32413d1441b6fe"
+      resolved-ref: cd30a6eb3679c4d798d38e646fb0e5ef4445eca1
       url: "git@github.com:AndreiLosev/plcart_debug_server_utils.git"
     source: git
     version: "1.0.0"
@@ -103,6 +103,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  future_soket:
+    dependency: "direct main"
+    description:
+      name: future_soket
+      sha256: c43235fee1a19d5cc14389cd4f2033c587ee8c9b5619d086274732a73d3fc971
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   glob:
     dependency: transitive
     description:

@@ -3,10 +3,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
+import 'package:future_soket/future_soket.dart';
 
 class Client {
   final String host;
-  late Socket _socket;
+  late FutureSoket _socket;
   StreamSubscription<Uint8List>? _subscription;
 
   Client(this.host);
@@ -14,24 +15,26 @@ class Client {
   Future<void> connect() async {
     final hostAndPort = host.split(':').take(2).toList();
     final port = int.parse(hostAndPort[1]);
-    _socket = await Socket.connect(hostAndPort[0], port,
+    final nSocket = await Socket.connect(hostAndPort[0], port,
         timeout: const Duration(seconds: 5));
+
+    _socket = FutureSoket.fromSoket(nSocket);
   }
 
   void write(ClientCommand commamd) {
-    _socket.add(commamd.toBytes());
+    writePacket(_socket, commamd.kind.code(), commamd.payload?.toMap());
   }
 
-  void listen(StreamController<ServerResponse> sController) {
-    _subscription = _socket.listen((data) {
-      sController.add(ServerResponse.fromBytes(data));
-    }, onDone: () => disconnect());
+  Future<ServerResponse> read() async {
+    final (type, payload) = await readPacket(_socket);
+
+    return ServerResponse(type.toResponseStatus(), payload);
   }
+
 
   Future<void> disconnect() async {
     _subscription?.cancel();
     _subscription = null;
-    await _socket.close();
-    _socket.destroy();
+    await _socket.disconnect();
   }
 }

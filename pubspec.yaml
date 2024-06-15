@@ -11,6 +11,7 @@ dependencies:
   debug_server_utils:
     git:
       url: git@github.com:AndreiLosev/plcart_debug_server_utils.git
+  future_soket: ^1.0.0
   # path: ^1.8.0
 
 dev_dependencies:
