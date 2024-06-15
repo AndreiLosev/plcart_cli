@@ -13,7 +13,7 @@ void main(List<String> arguments) async {
   client.write(ClientCommand(CommandKind.getRegisteredTasks, null));
   client.write(ClientCommand(CommandKind.getRegisteredEvents, null));
   client.write(ClientCommand(
-      CommandKind.runEvent, RunEventPayload("TestEvent", [1], {'q': "wasa"})));
+      CommandKind.runEvent, RunEventPayload("TestEvent", [10000000000], {'y': 0.00000000009})));
   client.write(ClientCommand(
       CommandKind.subscribeTask, SimplePayload({'value': "TestTask1"})));
   await Future.delayed(const Duration(seconds: 5));
