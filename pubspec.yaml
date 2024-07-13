@@ -12,6 +12,8 @@ dependencies:
     git:
       url: git@github.com:AndreiLosev/plcart_debug_server_utils.git
   future_soket: ^1.0.0
+  termlib: ^0.4.0
+  termparser: ^0.3.0
   # path: ^1.8.0
 
 dev_dependencies:
