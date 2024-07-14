@@ -19,14 +19,14 @@ class Client {
     _socket = FutureSoket.fromSoket(nSocket);
   }
 
-  void write(ClientCommand commamd) {
-    writePacket(_socket, commamd.kind.code(), commamd.payload?.toMap());
+  void write(ClientCommand commamd, [int requestId = 0]) {
+    writePacket(_socket, commamd.kind.code(), requestId, commamd.payload?.toMap());
   }
 
   Future<ServerResponse> read() async {
-    final (type, payload) = await readPacket(_socket);
+    final (type, id, payload) = await readPacket(_socket);
 
-    return ServerResponse(type.toResponseStatus(), payload);
+    return ServerResponse(type.toResponseStatus(), payload, id);
   }
 
 
