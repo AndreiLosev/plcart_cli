@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:collection';
+import 'dart:io';
 
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:termlib/termlib.dart';
@@ -9,9 +11,13 @@ class TuiApp {
   final _tigets = <ITidget>[];
   final _interactive = <Interactive>[];
   bool _run = true;
+  final _debugConsole = Queue<String>();
 
   int? addTiget(ITidget tiget) {
     _tigets.add(tiget);
+    if (_tigets.length == 1) {
+      _tigets.first.focuse = true;
+    }
     if (tiget is Interactive) {
       final index = _tigets.length;
       _interactive.add(tiget as Interactive);
@@ -19,10 +25,6 @@ class TuiApp {
     }
 
     return null;
-  }
-
-  void setChanelsToInteractive(int index, Stream rx, StreamSink tx) {
-    _interactive[index].setChanels(rx, tx);
   }
 
   Future<void> listen() async {
@@ -33,6 +35,8 @@ class TuiApp {
       if (event is! KeyEvent) {
         continue;
       }
+
+      _isEndCommand(event);
 
       if (_switchTigetHandler(event, commandBuffer)) {
         continue;
@@ -45,6 +49,13 @@ class TuiApp {
     }
   }
 
+  void toDebugBuffer(String mes) {
+    _debugConsole.addFirst(mes);
+    if (_debugConsole.length > 5) {
+      _debugConsole.removeLast();
+    }
+  }
+
   void render() {
     _lib
       ..enableAlternateScreen()
@@ -52,33 +63,33 @@ class TuiApp {
       ..cursorHide();
     _lib.enableRawMode();
 
-    Timer.periodic(const Duration(milliseconds: 30), (t) {
-      try {
-        if (!_run) {
-          t.cancel();
-
-          _lib.startSyncUpdate();
-          _lib.eraseClear();
-
-          for (var item in _tigets) {
-            item.render(_lib);
-          }
-
-          _lib.endSyncUpdate();
-        }
-      } finally {
-        _lib
-          ..disableAlternateScreen()
-          ..cursorShow();
-
-        _lib.flushThenExit(0);
+    Timer.periodic(const Duration(milliseconds: 50), (t) {
+      if (!_run) {
+        t.cancel();
       }
+
+      _lib.startSyncUpdate();
+      _lib.eraseClear();
+
+      for (var item in _tigets) {
+        item.render(_lib);
+      }
+
+      _lib.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns / 2).round());
+      _lib.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join("\n  "));
+
+      _lib.endSyncUpdate();
     });
   }
 
   void end() {
     _run = false;
     _lib.disableRawMode();
+    _lib
+      ..disableAlternateScreen()
+      ..cursorShow();
+
+    _lib.flushThenExit(0);
   }
 
   void _focuseNext() {
@@ -102,7 +113,7 @@ class TuiApp {
   }
 
   bool _switchTigetHandler(KeyEvent e, List<String> buff) {
-    if (_isSwitchTigetCommand(e)) {
+    if (_isSwitchTigetCommand(e) && buff.isEmpty) {
       buff.add('ctrl+w');
       return true;
     }
@@ -119,5 +130,11 @@ class TuiApp {
     }
 
     return false;
+  }
+
+  void _isEndCommand(KeyEvent e) {
+    if (e.modifiers.has(KeyModifiers.ctrl) && e.code.char == 'c') {
+      end();
+    }
   }
 }

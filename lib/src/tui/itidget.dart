@@ -13,3 +13,7 @@ abstract interface class Interactive<T, A> {
   void setKeyEvent(KeyEvent event);
   void setChanels(Stream<A> rx, StreamSink<T> tx);
 }
+
+abstract interface class IFlex {
+  int contentLen();
+}
