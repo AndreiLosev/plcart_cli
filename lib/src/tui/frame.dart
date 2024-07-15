@@ -1,4 +1,5 @@
 import 'package:plcart_cli/src/tui/itidget.dart';
+import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:termlib/termlib.dart';
 
 class Frame implements ITidget {
@@ -21,7 +22,7 @@ class Frame implements ITidget {
   int contentHeight([int add = 0]) => height - 2 + add;
 
   @override
-  void render(TermLib lib) {
+  void render(ShadowConsole lib) {
     List<Object> board = _getBoard(lib);
 
     for (var i = 0; i < width; i++) {
@@ -40,7 +41,7 @@ class Frame implements ITidget {
     lib.writeAt(top + height, letf, board[4]);
   }
 
-  List<Object> _getBoard(TermLib lib) => switch (focuse) {
+  List<Object> _getBoard(ShadowConsole lib) => switch (focuse) {
         true => _boardColor,
         false => _board,
       };

@@ -3,11 +3,13 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:plcart_cli/src/tui/itidget.dart';
+import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:termlib/termlib.dart';
 import 'package:termparser/termparser_events.dart';
 
 class TuiApp {
   final _lib = TermLib();
+  final _shadowConsole = ShadowConsole();
   final _tigets = <ITidget>[];
   final _interactive = <Interactive>[];
   bool _run = true;
@@ -68,16 +70,17 @@ class TuiApp {
         t.cancel();
       }
 
-      _lib.startSyncUpdate();
-      _lib.eraseClear();
-
       for (var item in _tigets) {
-        item.render(_lib);
+        item.render(_shadowConsole);
       }
 
-      _lib.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns / 2).round());
-      _lib.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join("\n  "));
+      _shadowConsole.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns / 2).round());
+      _shadowConsole.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join("\n  "));
 
+      _shadowConsole.comparete();
+
+      _lib.startSyncUpdate();
+      _shadowConsole.render(_lib);
       _lib.endSyncUpdate();
     });
   }

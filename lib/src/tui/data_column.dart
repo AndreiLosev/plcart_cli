@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
+import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:termlib/termlib.dart';
 import 'package:termparser/termparser_events.dart';
 
@@ -31,10 +32,30 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   late final StreamSink<String> _tx;
   late final String _name;
   int _scroll = 0;
-  int _lastRenderIndex = 0;
+  // int _lastRenderIndex = 0;
+  final bool _widthINdex;
 
-  DataColumn(String name, super.width, super.height, super.letf, super.top) {
+  DataColumn(
+      {required String name,
+      required int width,
+      required int height,
+      required int letf,
+      required int top,
+      widthINdex = false})
+      : _widthINdex = widthINdex,
+        super(width, height, letf, top) {
     _name = " $name ";
+  }
+
+  @override
+  set focuse(bool focuse) {
+    switch ((focuse, _data.length)) {
+      case (false, != 0):
+        _data[_getFocusedElementIndex()].focuse = false;
+      case (true, != 0):
+        _data[0].focuse = true;
+    }
+    super.focuse = focuse;
   }
 
   @override
@@ -44,7 +65,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
       switch (e.type) {
         case DataType.setData:
           _data.add(_DataSettings(e.data));
-          if (_data.length == 1) {
+          if (_data.length == 1 && super.focuse) {
             _data.first.focuse = true;
           }
         case DataType.response:
@@ -72,6 +93,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
         _data[index].focuse = false;
         final newIndex = (index + 1) % _data.length;
         _data[newIndex].focuse = true;
+        _scrollDownIfNeeded();
 
       case (KeyCodeName.enter, true):
         final index = _getFocusedElementIndex();
@@ -93,13 +115,14 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   }
 
   @override
-  void render(TermLib lib) {
+  void render(ShadowConsole lib) {
     super.render(lib);
 
     _renderTitle(lib);
 
     for (var i = _scroll; i < _data.length; i++) {
-      final content = Style(_data[i].name);
+      final content =
+          Style(_widthINdex ? "$i. ${_data[i].name}" : _data[i].name);
 
       if (_data[i].active) {
         content
@@ -110,15 +133,12 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
         content.reverse();
       }
 
-      if (contentHeight() < (i + _scroll)) {
-        _lastRenderIndex = i - 1;
+      if (i > contentHeight(_scroll)) {
         return;
       }
 
-      lib.writeAt(contentTop() + i, contentLeft(), content);
+      lib.writeAt(contentTop(i - _scroll), contentLeft(), content);
     }
-
-    _lastRenderIndex = _data.length - 1;
   }
 
   @override
@@ -134,17 +154,13 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
     return max;
   }
 
-  void handleScroll(KeyCodeName code) {
-    switch (code) {
-      case KeyCodeName.up:
-        if (_scroll == _getFocusedElementIndex()) {
-          _scroll -= 1;
-        }
-      case KeyCodeName.down:
-        if (_lastRenderIndex == _getFocusedElementIndex()) {
-          _scroll += 1;
-        }
-      default:
+  void _scrollDownIfNeeded() {
+    final index = _getFocusedElementIndex();
+    if (index == 0) {
+      _scroll = 0;
+    }
+    if (index > contentHeight(_scroll)) {
+      _scroll += 1;
     }
   }
 
@@ -158,9 +174,10 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
     return 0;
   }
 
-  void _renderTitle(TermLib lib) {
-    final addWiteSpace =  ' ' * ((width - _name.length - 4) / 2).round();
-    final prittyText = "$addWiteSpace$_name$addWiteSpace${width % 2 == 0 ? '' : ' '}"; 
+  void _renderTitle(ShadowConsole lib) {
+    final addWiteSpace = ' ' * ((width - _name.length - 4) / 2).round();
+    final prittyText =
+        "$addWiteSpace$_name$addWiteSpace${width % 2 == 0 ? '' : ' '}";
     final style = switch (super.focuse) {
       true => Style(prittyText)
         ..bold()
