@@ -25,7 +25,7 @@ void main(List<String> args) async {
   final sc11 = StreamController<Message>();
   final sc21 = StreamController<String>();
   final eventList1 =
-      DataColumn(name: 'test__2', width: 15, height: 15, letf: 105, top: 5);
+      DataColumn(name: 'test__2', width: 15, height: 15, letf: 165, top: 5);
   eventList1.setChanels(sc11.stream, sc21.sink);
   sc11.add(Message.data('w_a_sa'));
   sc11.add(Message.data('Ig_o+r'));
@@ -45,4 +45,8 @@ void main(List<String> args) async {
   sc21.stream.listen((m) {
     app.toDebugBuffer(m);
   });
+
+  // Timer.periodic(Duration(seconds: 1), (_) {
+  //   eventList.letf += 20;
+  // });
 }

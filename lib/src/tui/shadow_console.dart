@@ -11,8 +11,8 @@ class ShadowConsole {
     final width = stdout.terminalColumns;
     final hieght = stdout.terminalLines;
 
-    // final width = 10;
-    // final hieght = 6;
+    // final width = 14;
+    // final hieght = 8;
 
     for (var i = 0; i < hieght; i++) {
       final row = <String>[];
@@ -27,14 +27,13 @@ class ShadowConsole {
   }
 
   void writeAt(int row, int col, Object s) {
-    final text = s.toString();
     if (row > _newConsole.length || col > _newConsole[row].length) {
       return;
     }
-    // for (var i = 0; i < text.length; i++) {
-    //   _newConsole[row][col + i] = text[i];
-    // }
-    _newConsole[row][col] = text;
+    final arrText = _asTerminal(s);
+    for (var (i, char) in arrText.indexed) {
+      _newConsole[row][col + i] = char;
+    }
   }
 
   void comparete() {
@@ -47,11 +46,13 @@ class ShadowConsole {
       }
     }
 
+    // _console.forEach(print);
+
+    // print(_renderBuffer);
+
     for (var i = 0; i < _newConsole.length; i++) {
-      for (var j = 0; j < _newConsole[i].length; j++) {
-        if (_newConsole[i][j] != ' ') {
-          _newConsole[i][j] = ' ' * _newConsole[i][j].length;
-        }
+      for (var j = 1; j < _newConsole[i].length; j++) {
+        _newConsole[i][j] = ' ';
       }
     }
   }
@@ -62,5 +63,21 @@ class ShadowConsole {
     }
 
     _renderBuffer.clear();
+  }
+
+  static Iterable<String> _asTerminal(Object s) {
+    final text = s.toString();
+    switch (s) {
+      case Style():
+        final p = text.replaceFirst(s.text, '   ');
+        final [start, end] = p.split('   ');
+        final result = <String>[];
+        for (var i = 0; i < s.text.length; i++) {
+          result.add("$start${s.text[i]}$end");
+        }
+        return result;
+      default:
+        return text.runes.map((e) => String.fromCharCode(e));
+    }
   }
 }
