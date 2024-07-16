@@ -76,9 +76,7 @@ class TuiApp {
 
       _shadowConsole.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns - 5).round());
       
-      for (var (i, s) in _debugConsole.indexed) {
-          _shadowConsole.writeAt(stdout.terminalLines - 5 + i, 3, s);
-      }
+      _shadowConsole.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join(Platform.lineTerminator));
 
       _shadowConsole.comparete();
 

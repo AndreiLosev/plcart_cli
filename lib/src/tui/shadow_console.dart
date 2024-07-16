@@ -31,8 +31,10 @@ class ShadowConsole {
       return;
     }
     final arrText = _asTerminal(s);
-    for (var (i, char) in arrText.indexed) {
-      _newConsole[row][col + i] = char;
+    for (var (j, line) in arrText.indexed) {
+      for (var (i, char) in line.indexed) {
+        _newConsole[row + j][col + i] = char;
+      }
     }
   }
 
@@ -45,10 +47,6 @@ class ShadowConsole {
         }
       }
     }
-
-    // _console.forEach(print);
-
-    // print(_renderBuffer);
 
     for (var i = 0; i < _newConsole.length; i++) {
       for (var j = 1; j < _newConsole[i].length; j++) {
@@ -65,24 +63,31 @@ class ShadowConsole {
     _renderBuffer.clear();
   }
 
-  static Iterable<String> _asTerminal(Object s) {
+  static Iterable<Iterable<String>> _asTerminal(Object s) {
     final text = s.toString();
     switch (s) {
       case Style():
         final p = text.replaceFirst(s.text, '   ');
         final [start, end] = p.split('   ');
-        final result = <String>[];
-        for (var i = 0; i < s.text.length; i++) {
-          result.add("$start${s.text[i]}$end");
+        final result = <List<String>>[];
+        for (var line in s.text.split(Platform.lineTerminator)) {
+          result.add([]);
+          for (var i = 0; i < line.length; i++) {
+            result.last.add("$start${line[i]}$end");
+          }
         }
+
         return result;
       default:
-        final result = <String>[];
-        for (var i = 0; i < text.length; i++) {
-          result.add(text[i]);
+        final result = <List<String>>[];
+        for (var line in text.split(Platform.lineTerminator)) {
+          result.add([]);
+          for (var i = 0; i < line.length; i++) {
+            result.last.add(line[i]);
+          }
         }
-        return result;
 
+        return result;
     }
   }
 }
