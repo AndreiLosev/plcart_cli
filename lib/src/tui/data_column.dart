@@ -87,6 +87,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
           _ => index - 1,
         };
         _data[newIndex].focuse = true;
+        _scrollUpIfNeeded();
 
       case (KeyCodeName.down, true):
         final index = _getFocusedElementIndex();
@@ -161,6 +162,16 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
     }
     if (index > contentHeight(_scroll)) {
       _scroll += 1;
+    }
+  }
+
+  void _scrollUpIfNeeded() {
+    final index = _getFocusedElementIndex();
+    if (index == (_data.length - 1)) {
+      _scroll = (_data.length - 1);
+    }
+    if (index < _scroll) {
+      _scroll -= 1;
     }
   }
 
