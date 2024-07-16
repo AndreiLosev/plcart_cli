@@ -77,7 +77,12 @@ class ShadowConsole {
         }
         return result;
       default:
-        return text.runes.map((e) => String.fromCharCode(e));
+        final result = <String>[];
+        for (var i = 0; i < text.length; i++) {
+          result.add(text[i]);
+        }
+        return result;
+
     }
   }
 }
