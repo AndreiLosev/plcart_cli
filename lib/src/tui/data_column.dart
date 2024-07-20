@@ -32,8 +32,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   late final StreamSink<String> _tx;
   late final String _name;
   int _scroll = 0;
-  // int _lastRenderIndex = 0;
-  final bool _widthINdex;
+  final bool _widthIndex;
 
   DataColumn(
       {required String name,
@@ -41,8 +40,8 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
       required int height,
       required int letf,
       required int top,
-      widthINdex = false})
-      : _widthINdex = widthINdex,
+      widthIndex = false})
+      : _widthIndex = widthIndex,
         super(width, height, letf, top) {
     _name = " $name ";
   }
@@ -59,6 +58,15 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   }
 
   @override
+  int get innerDataWidth {
+    int res = _data.fold(0, (a, e) => e.name.length > a ? e.name.length : a);
+    return res + (_widthIndex ? 3 : 0) + 4;
+  }
+
+  @override
+  int get innerDataHeight => _data.length + 1 + (height - contentHeight()) * 2;
+
+  @override
   void setChanels(Stream<Message> rx, StreamSink<String> tx) {
     _tx = tx;
     rx.listen((e) {
@@ -69,8 +77,11 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
             _data.first.focuse = true;
           }
         case DataType.response:
+          final [name, action] = e.data.split('::');
           for (var item in _data) {
-            item.active = false;
+            if (item.name == name) {
+              item.active = action == 'enable';
+            }
           }
       }
     });
@@ -99,7 +110,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
       case (KeyCodeName.enter, true):
         final index = _getFocusedElementIndex();
         _tx.add(_data[index].name);
-        _data[index].active = true;
+        _data[index].active = !_data[index].active;
 
       default:
     }
@@ -123,7 +134,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
 
     for (var i = _scroll; i < _data.length; i++) {
       final content =
-          Style(_widthINdex ? "$i. ${_data[i].name}" : _data[i].name);
+          Style(_widthIndex ? "$i. ${_data[i].name}" : _data[i].name);
 
       if (_data[i].active) {
         content
@@ -168,7 +179,9 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   void _scrollUpIfNeeded() {
     final index = _getFocusedElementIndex();
     if (index == (_data.length - 1)) {
-      _scroll = (_data.length - 1);
+      if ((_data.length - 1) > contentHeight()) {
+        _scroll = (_data.length - 1) - contentHeight();
+      }
     }
     if (index < _scroll) {
       _scroll -= 1;

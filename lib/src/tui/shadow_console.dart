@@ -11,9 +11,6 @@ class ShadowConsole {
     final width = stdout.terminalColumns;
     final hieght = stdout.terminalLines;
 
-    // final width = 14;
-    // final hieght = 8;
-
     for (var i = 0; i < hieght; i++) {
       final row = <String>[];
       final newRow = <String>[];
@@ -27,12 +24,15 @@ class ShadowConsole {
   }
 
   void writeAt(int row, int col, Object s) {
-    if (row > _newConsole.length || col > _newConsole[row].length) {
+    if (row > (_newConsole.length - 1) || col > (_newConsole[row].length - 1)) {
       return;
     }
     final arrText = _asTerminal(s);
     for (var (j, line) in arrText.indexed) {
       for (var (i, char) in line.indexed) {
+        if ((row + j) > (_newConsole.length - 1) || (col + i) > (_newConsole[row].length - 1)) {
+          return;
+        }
         _newConsole[row + j][col + i] = char;
       }
     }

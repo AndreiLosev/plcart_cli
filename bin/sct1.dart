@@ -1,16 +1,14 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:plcart_cli/src/tui/data_column.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
-import 'package:termlib/termlib.dart';
 import 'package:termparser/termparser_events.dart';
 
 void main(List<String> args) async {
   // final lib = TermLib();
   final sc = ShadowConsole();
   final f = DataColumn(
-      name: 'test1', width: 10, height: 6, letf: 1, top: 1, widthINdex: true);
+      name: 'test1', width: 10, height: 6, letf: 1, top: 1, widthIndex: true);
 
   final channelSend = StreamController<Message>(sync: true);
   final channelRess = StreamController<String>(sync: true);

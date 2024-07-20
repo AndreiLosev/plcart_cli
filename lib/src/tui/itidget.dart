@@ -15,5 +15,6 @@ abstract interface class Interactive<T, A> {
 }
 
 abstract interface class IFlex {
-  int contentLen();
+  int get innerDataWidth;
+  int get innerDataHeight;
 }

@@ -74,7 +74,7 @@ class TuiApp {
         item.render(_shadowConsole);
       }
 
-      _shadowConsole.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns - 5).round());
+      // _shadowConsole.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns - 5).round());
       
       _shadowConsole.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join(Platform.lineTerminator));
 
