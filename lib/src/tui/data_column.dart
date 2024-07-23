@@ -27,9 +27,16 @@ class Message {
   Message.response(this.data) : type = DataType.response;
 }
 
-class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
+class SendMessage {
+  final bool enable;
+  final String name;
+
+  SendMessage(this.enable, this.name);
+}
+
+class DataColumn extends Frame implements Interactive<SendMessage, Message>, IFlex {
   final _data = <_DataSettings>[];
-  late final StreamSink<String> _tx;
+  late final StreamSink<SendMessage> _tx;
   late final String _name;
   int _scroll = 0;
   final bool _widthIndex;
@@ -67,7 +74,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
   int get innerDataHeight => _data.length + 1 + (height - contentHeight()) * 2;
 
   @override
-  void setChanels(Stream<Message> rx, StreamSink<String> tx) {
+  void setChanels(Stream<Message> rx, StreamSink<SendMessage> tx) {
     _tx = tx;
     rx.listen((e) {
       switch (e.type) {
@@ -109,7 +116,7 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
 
       case (KeyCodeName.enter, true):
         final index = _getFocusedElementIndex();
-        _tx.add(_data[index].name);
+        _tx.add(SendMessage(_data[index].active, _data[index].name));
         _data[index].active = !_data[index].active;
 
       default:
@@ -153,7 +160,6 @@ class DataColumn extends Frame implements Interactive<String, Message>, IFlex {
     }
   }
 
-  @override
   int contentLen() {
     int max = _name.length;
 

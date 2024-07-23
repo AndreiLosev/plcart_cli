@@ -5,18 +5,10 @@ import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:future_soket/future_soket.dart';
 
 class Client {
-  final String host;
   late FutureSoket _socket;
 
-  Client(this.host);
-
-  Future<void> connect() async {
-    final hostAndPort = host.split(':').take(2).toList();
-    final port = int.parse(hostAndPort[1]);
-    final nSocket = await Socket.connect(hostAndPort[0], port,
-        timeout: const Duration(seconds: 5));
-
-    _socket = FutureSoket.fromSoket(nSocket);
+  Client(Socket soket) {
+    _socket = FutureSoket.fromSoket(soket);
   }
 
   void write(ClientCommand commamd, [int requestId = 0]) {
