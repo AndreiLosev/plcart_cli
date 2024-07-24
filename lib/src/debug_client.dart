@@ -8,6 +8,7 @@ import 'package:plcart_cli/src/tui/main_tidget.dart';
 enum TypeTiget {
   task,
   event,
+  disableTask,
   taskStart,
   eventStart;
 }
@@ -21,9 +22,9 @@ class Request {
 
 class DebugClient {
   late final Client _client;
-  int _statrStep = 0;
   final _requests = <int, Request>{};
   int _requestId = 0;
+  bool verbose = false;
 
   final eventRx = StreamController<Message>();
   final eventTx = StreamController<SendMessage>();
@@ -43,6 +44,7 @@ class DebugClient {
       final id = _getRequestId();
       final com =
           ClientCommand(CommandKind.runEvent, RunEventPayload(e.name, [], {}));
+      log(['write:', CommandKind.runEvent, e]);
       _client.write(com, id);
       _requests[id] = Request(TypeTiget.event, e.name);
     });
@@ -56,8 +58,10 @@ class DebugClient {
         false => ClientCommand(
             CommandKind.unsubscribeTask, SimplePayload({'value': e.name})),
       };
+      log(['write:', com.kind, e]);
       _client.write(com, id);
-      _requests[id] = Request(TypeTiget.task, e.name);
+      final type = com.kind == CommandKind.subscribeTask ? TypeTiget.task : TypeTiget.disableTask;
+      _requests[id] = Request(type, e.name);
     });
 
     mainTx.stream.listen((e) {});
@@ -71,39 +75,36 @@ class DebugClient {
     );
 
     _requests[id] = Request(TypeTiget.taskStart, ''); 
+    log(['write', CommandKind.getRegisteredTasks, {'id': id}]);
 
     id = _getRequestId();
     _client.write(
       ClientCommand(CommandKind.getRegisteredEvents, null),
       id,
     );
-
+    log(['write', CommandKind.getRegisteredEvents, {'id': id}]);
     _requests[id] = Request(TypeTiget.eventStart, ''); 
-
-    await Future.delayed(const Duration(seconds: 1));
-
-    if (_requests.isEmpty && _statrStep > 2) {
-      throw 'emptyStart';
-    }
   }
 
-  void listen() async {
+  Future<void> listen() async {
     while (_client.isConnected()) {
       final response = await _client.read();
       final req = _requests.remove(response.id);
+
+      log(['read:', response.responseStatus, response.id, response.message]);
 
       if (response.responseStatus != ResponseStatus.ok) {
         consoleRx.add(response.message.toString());
       }
 
       if (req == null && response.responseStatus == ResponseStatus.ok) {
-        mainRx.add(req as Map);
+        mainRx.add(response.message);
         continue;
       }
 
       final postfix = switch (response.responseStatus) {
         ResponseStatus.ok => 'enable',
-        _ => 'desaable',
+        _ => 'desable',
       };
 
       switch (req!.tiget) {
@@ -111,16 +112,16 @@ class DebugClient {
           for (var item in response.message['registeredTasks'] as List) {
             taskRx.add(Message.data(item));
           }
-          _statrStep += 1;
         case TypeTiget.eventStart:
           for (var item in response.message['registeredEvents'] as List) {
             eventRx.add(Message.data(item));
           }
-          _statrStep += 1;
         case TypeTiget.task:
           taskRx.add(Message.response("${req.data}::$postfix"));
         case TypeTiget.event:
           eventRx.add(Message.response("${req.data}::$postfix"));
+      case TypeTiget.disableTask:
+        taskRx.add(Message.response("${req.data}::desable"));
       }
     }
   }
@@ -134,5 +135,22 @@ class DebugClient {
     }
 
     return _requestId;
+  }
+
+  void stop() {
+    eventRx.close();
+    eventTx.close();
+    taskRx.close();
+    taskTx.close();
+    mainTx.close();
+    mainRx.close();
+    consoleRx.close();
+    _client.disconnect();
+  }
+
+  void log(Object mess) {
+    if (verbose) {
+      consoleRx.add(mess.toString());
+    }
   }
 }

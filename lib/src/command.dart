@@ -1,0 +1,47 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:plcart_cli/src/client.dart';
+import 'package:plcart_cli/src/debug_client.dart';
+import 'package:plcart_cli/src/tui/console.dart';
+import 'package:plcart_cli/src/tui/data_column.dart';
+import 'package:plcart_cli/src/tui/frame.dart';
+import 'package:plcart_cli/src/tui/layout.dart';
+import 'package:plcart_cli/src/tui/tui_app.dart';
+
+class Command {
+  Future<void> debug(String host) async {
+    final soket = await Socket.connect(host, 11223);
+    final client = Client(soket);
+    final debugClient = DebugClient(client);
+    debugClient.verbose = true;
+    final events = DataColumn(name: "Events", widthIndex: true);
+    final tasks = DataColumn(name: 'Tasks', widthIndex: true);
+    final main = Frame(10, 10, 10, 10);
+    final console = Console();
+
+    tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
+    events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);
+    console.setChanels(debugClient.consoleRx.stream, null);
+    
+    final app = TuiApp()
+      ..addTiget(tasks)
+      ..addTiget(events)
+      ..addTiget(main)
+      ..addTiget(console);
+
+    app.listen();
+    app.render();
+
+    final lt = Timer.periodic(Duration(seconds: 2), (_) {
+      Layout.applay(events, tasks, main, console);
+    });
+
+    app.addEndCallback(lt.cancel);
+    app.addEndCallback(debugClient.stop);
+
+    debugClient.subscribe();
+    await debugClient.start();
+    await debugClient.listen();
+  }
+}

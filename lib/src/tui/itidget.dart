@@ -11,7 +11,7 @@ abstract interface class ITidget {
 
 abstract interface class Interactive<T, A> {
   void setKeyEvent(KeyEvent event);
-  void setChanels(Stream<A> rx, StreamSink<T> tx);
+  void setChanels(Stream<A> rx, StreamSink<T>? tx);
 }
 
 abstract interface class IFlex {

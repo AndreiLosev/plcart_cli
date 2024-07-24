@@ -28,11 +28,11 @@ class Layout {
     main.top = 1;
     main.letf = 1;
     main.width = width - tasks.width - 5;
-    main.height = hieght - 9;
+    main.height = hieght - 12;
 
     conosle.letf = 1;
     conosle.top = main.height + 2;
     conosle.width =  width - tasks.width - 5;
-    conosle.height = 6;
+    conosle.height = 9;
   }
 }

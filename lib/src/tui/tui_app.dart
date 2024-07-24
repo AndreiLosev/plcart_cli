@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:collection';
-import 'dart:io';
 
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
@@ -14,6 +13,7 @@ class TuiApp {
   final _interactive = <Interactive>[];
   bool _run = true;
   final _debugConsole = Queue<String>();
+  final _endCallbecks = <Function>[];
 
   int? addTiget(ITidget tiget) {
     _tigets.add(tiget);
@@ -27,6 +27,10 @@ class TuiApp {
     }
 
     return null;
+  }
+
+  void addEndCallback(Function fn) {
+    _endCallbecks.add(fn);
   }
 
   Future<void> listen() async {
@@ -74,10 +78,6 @@ class TuiApp {
         item.render(_shadowConsole);
       }
 
-      // _shadowConsole.writeAt(stdout.terminalLines - 6, 1, "_" * (stdout.terminalColumns - 5).round());
-      
-      _shadowConsole.writeAt(stdout.terminalLines - 5, 3, _debugConsole.join(Platform.lineTerminator));
-
       _shadowConsole.comparete();
 
       _lib.startSyncUpdate();
@@ -88,6 +88,11 @@ class TuiApp {
 
   void end() {
     _run = false;
+
+    for (var fn in _endCallbecks) {
+      fn();
+    }
+
     _lib.disableRawMode();
     _lib
       ..disableAlternateScreen()

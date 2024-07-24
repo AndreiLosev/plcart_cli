@@ -32,9 +32,15 @@ class SendMessage {
   final String name;
 
   SendMessage(this.enable, this.name);
+
+  @override
+  String toString() {
+    return {'enable': enable, 'name': name}.toString();
+  }
 }
 
-class DataColumn extends Frame implements Interactive<SendMessage, Message>, IFlex {
+class DataColumn extends Frame
+    implements Interactive<SendMessage, Message>, IFlex {
   final _data = <_DataSettings>[];
   late final StreamSink<SendMessage> _tx;
   late final String _name;
@@ -43,10 +49,10 @@ class DataColumn extends Frame implements Interactive<SendMessage, Message>, IFl
 
   DataColumn(
       {required String name,
-      required int width,
-      required int height,
-      required int letf,
-      required int top,
+      int width = 10,
+      int height = 10,
+      int letf = 10,
+      int top = 10,
       widthIndex = false})
       : _widthIndex = widthIndex,
         super(width, height, letf, top) {
@@ -74,8 +80,8 @@ class DataColumn extends Frame implements Interactive<SendMessage, Message>, IFl
   int get innerDataHeight => _data.length + 1 + (height - contentHeight()) * 2;
 
   @override
-  void setChanels(Stream<Message> rx, StreamSink<SendMessage> tx) {
-    _tx = tx;
+  void setChanels(Stream<Message> rx, StreamSink<SendMessage>? tx) {
+    _tx = tx!;
     rx.listen((e) {
       switch (e.type) {
         case DataType.setData:
@@ -116,7 +122,7 @@ class DataColumn extends Frame implements Interactive<SendMessage, Message>, IFl
 
       case (KeyCodeName.enter, true):
         final index = _getFocusedElementIndex();
-        _tx.add(SendMessage(_data[index].active, _data[index].name));
+        _tx.add(SendMessage(!_data[index].active, _data[index].name));
         _data[index].active = !_data[index].active;
 
       default:
