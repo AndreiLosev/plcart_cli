@@ -27,10 +27,28 @@ class ShadowConsole {
     if (row > (_newConsole.length - 1) || col > (_newConsole[row].length - 1)) {
       return;
     }
+
+    if (s is Iterable<Object>) {
+      final arrTexts = s.map(_asTerminal);
+      int left = 0;
+      for (var item in arrTexts) {
+        for (var (j, char) in item.first.indexed) {
+          _newConsole[row][col + j + left] = char;
+        }
+        _newConsole[row][col + item.length + left + 1] =',';
+        _newConsole[row][col + item.length + left + 2] =' ';
+
+        left += item.length + item.first.length + 2;
+      }
+
+      return;
+    }
+
     final arrText = _asTerminal(s);
     for (var (j, line) in arrText.indexed) {
       for (var (i, char) in line.indexed) {
-        if ((row + j) > (_newConsole.length - 1) || (col + i) > (_newConsole[row].length - 1)) {
+        if ((row + j) > (_newConsole.length - 1) ||
+            (col + i) > (_newConsole[row].length - 1)) {
           return;
         }
         _newConsole[row + j][col + i] = char;
