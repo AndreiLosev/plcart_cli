@@ -1,11 +1,13 @@
 import 'dart:io';
 
+import 'package:plcart_cli/src/tui/style_searcher.dart';
 import 'package:termlib/termlib.dart';
 
 class ShadowConsole {
   final List<List<String>> _console = [];
   final List<List<String>> _newConsole = [];
   final _renderBuffer = <(int row, int col, Object s)>[];
+  final _searcher = StyleSearcher();
 
   ShadowConsole() {
     final width = stdout.terminalColumns;
@@ -28,31 +30,22 @@ class ShadowConsole {
       return;
     }
 
-    if (s is Iterable<Object>) {
-      final arrTexts = s.map(_asTerminal);
-      int left = 0;
-      for (var item in arrTexts) {
-        for (var (j, char) in item.first.indexed) {
-          _newConsole[row][col + j + left] = char;
-        }
-        _newConsole[row][col + item.length + left + 1] =',';
-        _newConsole[row][col + item.length + left + 2] =' ';
+    final styledChars = _searcher
+        .search(s.toString())
+        .map((e) => e.toStyledChars())
+        .expand((x) => x)
+        .toList();
 
-        left += item.length + item.first.length + 2;
+    for (var (i, char) in styledChars.indexed) {
+      if ((row) > (_newConsole.length - 1) ||
+          (col + i) > (_newConsole[row].length - 1)) {
+        return;
       }
 
-      return;
-    }
-
-    final arrText = _asTerminal(s);
-    for (var (j, line) in arrText.indexed) {
-      for (var (i, char) in line.indexed) {
-        if ((row + j) > (_newConsole.length - 1) ||
-            (col + i) > (_newConsole[row].length - 1)) {
-          return;
-        }
-        _newConsole[row + j][col + i] = char;
+      if (char.contains(Platform.lineTerminator)) {
+        row += 1;
       }
+      _newConsole[row][col + i] = char;
     }
   }
 
@@ -79,33 +72,5 @@ class ShadowConsole {
     }
 
     _renderBuffer.clear();
-  }
-
-  static Iterable<Iterable<String>> _asTerminal(Object s) {
-    final text = s.toString();
-    switch (s) {
-      case Style():
-        final p = text.replaceFirst(s.text, '   ');
-        final [start, end] = p.split('   ');
-        final result = <List<String>>[];
-        for (var line in s.text.split(Platform.lineTerminator)) {
-          result.add([]);
-          for (var i = 0; i < line.length; i++) {
-            result.last.add("$start${line[i]}$end");
-          }
-        }
-
-        return result;
-      default:
-        final result = <List<String>>[];
-        for (var line in text.split(Platform.lineTerminator)) {
-          result.add([]);
-          for (var i = 0; i < line.length; i++) {
-            result.last.add(line[i]);
-          }
-        }
-
-        return result;
-    }
   }
 }

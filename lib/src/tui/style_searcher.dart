@@ -18,11 +18,17 @@ class StyleResult {
   }
 
   String wrap(String s) {
+    if (style == null) return s;
     return "$style$s${ansi.CSI}0m";
+  }
+
+  List<String> toStyledChars() {
+    return [for (var i = 0; i < text.length; i++) wrap(text[i])];
   }
 }
 
 class StyleSearcher {
+
   List<StyleResult> search(String str) {
     final regexp = RegExp("[0-9]{1,2}m");
     final stylesList = str.split("${ansi.CSI}0m");
@@ -58,18 +64,6 @@ class StyleSearcher {
       final text = s.substring(stylesEnd[i]!);
 
       result.add(StyleResult(text, style));
-    }
-
-    return result;
-  }
-
-  List<List<String>> toCharList(String text) {
-    final result = <List<String>>[];
-    for (var line in text.split(Platform.lineTerminator)) {
-      result.add([]);
-      for (var i = 0; i < line.length; i++) {
-        result.last.add(line[i]);
-      }
     }
 
     return result;

@@ -8,5 +8,5 @@ void main(List<String> args) {
   final s2 = Style('world')..fg(Color.yellow)..bold();
   final s3 = '!!!';
 
-  print(searcher.search('$s1$s2$s3'));
+  print(searcher.search('$s1$s2$s3').map((e) => e.toStyledChars()).expand((x) => x).toList());
 }
