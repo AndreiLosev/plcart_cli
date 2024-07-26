@@ -11,7 +11,7 @@ class ForseValue {}
 
 class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   late final StreamSink<ForseValue> _tx;
-  Map? _buffer;
+  final _buffer = StringBuffer();
 
   MainTidget({
     int width = 30,
@@ -28,33 +28,34 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     _tx = tx!;
 
     rx.listen((e) {
-      _buffer = e.cast();
+      _buffer.clear();
+      for (final MapEntry(key: taskName, value: fields) in e.entries) {
+        final s = Style("$taskName:")
+          ..bold()
+          ..fg(Color('81'))
+          ..underline();
+        _buffer.writeln("  $s");
+        _setTaskFieds(fields);
+      }
     });
+  }
+
+  void _setTaskFieds(Map fields) {
+    for (final MapEntry(key: name, value: value) in fields.entries) {
+      final sn = Style("$name")..fg(Color.brightYellow);
+      final sv = _styledValue(value);
+      _buffer.writeln("    $sn: $sv");
+    }
   }
 
   @override
   void render(ShadowConsole lib) {
     super.render(lib);
-    if (_buffer == null) {
+    if (_buffer.isEmpty) {
       return;
     }
 
-    int top = 0;
-    for (final MapEntry(key: taskName, value: fields) in _buffer!.entries) {
-      final s = Style("$taskName:")
-        ..bold()
-        ..fg(Color.blue)
-        ..underline();
-      lib.writeAt(contentTop(top), contentLeft(2), s);
-      for (final (int i, MapEntry(key: name, value: value))
-          in (fields as Map).entries.indexed) {
-        final nameLen = (name as String).length;
-        final sn = Style("$name:")..fg(Color.brightYellow);
-        lib.writeAt(contentTop(1 + i + top), contentLeft(4), sn);
-        lib.writeAt(contentTop(1 + i + top), contentLeft(6 + nameLen), _styledValue(value));
-      }
-      top += fields.length + 1;
-    }
+    lib.writeAt(contentTop(), contentLeft(), _buffer.toString());
   }
 
   Object _styledValue(value) {
@@ -63,10 +64,32 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
       int() => Style(value.toString())..fg(Color.cyan),
       double() => Style(value.toStringAsFixed(4))..fg(Color.magenta),
       String() => Style("'$value'")..fg(Color.green),
-      Iterable() => value.map(_styledValue),
-      Map() => Map.fromEntries(value.entries
-          .map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value)))),
+      Iterable() => _styledIterable(value),
+      Map() => _styledMap(value),
       _ => value,
     };
+  }
+
+  Iterable _styledIterable(Iterable it) {
+    if (it.length > 10) {
+      return it.take(10).map(_styledValue).toList()..add('...');
+    }
+
+    return it.map(_styledValue).toList();
+  }
+
+  Map _styledMap(Map m) {
+    final im = m.entries;
+    if (im.length > 10) {
+      final rm = Map.fromEntries(im
+          .take(10)
+          .map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value))));
+      rm[''] = ['...'];
+
+      return rm;
+    }
+
+    return Map.fromEntries(
+        im.map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value))));
   }
 }

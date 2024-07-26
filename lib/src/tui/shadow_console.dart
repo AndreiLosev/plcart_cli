@@ -35,8 +35,9 @@ class ShadowConsole {
         .map((e) => e.toStyledChars())
         .expand((x) => x)
         .toList();
-
-    for (var (i, char) in styledChars.indexed) {
+    
+    int i = 0;
+    for (var char in styledChars) {
       if ((row) > (_newConsole.length - 1) ||
           (col + i) > (_newConsole[row].length - 1)) {
         return;
@@ -44,8 +45,10 @@ class ShadowConsole {
 
       if (char.contains(Platform.lineTerminator)) {
         row += 1;
+        i = 0;
       }
       _newConsole[row][col + i] = char;
+      i++;
     }
   }
 
