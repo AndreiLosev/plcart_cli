@@ -15,7 +15,7 @@ dependencies:
   termansi: ^0.3.1
   termlib: ^0.4.0
   termparser: ^0.3.0
-  # path: ^1.8.0
+  path: ^1.8.0
 
 dev_dependencies:
   build_runner: ^2.4.11

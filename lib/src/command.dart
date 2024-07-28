@@ -17,7 +17,7 @@ class Command {
     // debugClient.verbose = true;
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
-    final main = MainTidget();
+    final main = MainTidget(path: '/home/andrei/documents/my/plcartProject/test1/');
     final console = Console();
 
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
