@@ -41,8 +41,11 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
           ..fg(Color('81'))
           ..underline();
         _buffer.writeln("  $s");
-
-        _setTaskFieds(fields);
+        if (_colorist.isSubtipe(fields)) {
+          _buffer.writeln(_colorist.setTaskFieds(fields[1]));
+        } else {
+          _buffer.writeln(_colorist.setTaskFieds(fields));
+        }
       }
 
       _buffer.writeln("____________\n");
@@ -51,14 +54,6 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
             e.keys.firstOrNull, await _grep.search(e.keys.firstOrNull)),
       );
     });
-  }
-
-  void _setTaskFieds(Map fields) {
-    for (final MapEntry(key: name, value: value) in fields.entries) {
-      final sn = Style("$name")..fg(Color.brightYellow);
-      final sv = _colorist.styledValue(value);
-      _buffer.writeln("    $sn: $sv");
-    }
   }
 
   @override

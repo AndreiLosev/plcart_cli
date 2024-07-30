@@ -1,10 +1,25 @@
-import 'package:termlib/termlib.dart';
+import 'package:plcart_cli/src/tui/colorist.dart';
 
 void main(List<String> args) {
-  final fn = "final z = 8;\n testfn(5, 5.1);\n var zz = 12;\n testfn();";
-  final x = fn.replaceAllMapped(RegExp(" testfn\\(.*\\)( |;)"),  (Match x) {
-    return x[0]!.replaceFirst('testfn', (Style('tesstFn')..fg(Color.blue)).toString());
-  });
-
-  print(x);
+  final c = Colorist();
+  final data = [
+    'TestTask',
+    {
+      'b': true,
+      'x': 15,
+      'y': 96.69,
+      's': "hello wasa",
+      'l': [1, 2, true, 'ok'],
+      'm': {'1': 2},
+      'timer': [
+        "Ton",
+        {
+          'in1': false,
+          'pt': "#T 15s 45ms",
+          'q': false,
+          'et': "#T 0s",
+        }
+      ],
+    }
+  ];
 }

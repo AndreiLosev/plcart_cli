@@ -9,23 +9,40 @@ class Colorist {
   final _methondFinder = MethodsFinder();
   final _cache = <String, String>{};
 
-  Object styledValue(value) {
+  Object _styledValue(value) {
     return switch (value) {
       bool() => Style(value.toString())..fg(Color.red),
       int() => Style(value.toString())..fg(Color.cyan),
       double() => Style(value.toStringAsFixed(4))..fg(Color.magenta),
-      String() => Style("'$value'")..fg(Color.green),
+      String() => _styledString(value),
       Iterable() => _styledIterable(value),
       Map() => _styledMap(value),
       _ => value,
     };
   }
 
+  Style _styledString(String value) {
+    if (value.startsWith("#T")) {
+      return Style(value)
+        ..fg(Color.cyan)
+        ..underline();
+    }
+
+    return Style("'$value'")..fg(Color.green);
+  }
+
   String _styledIterable(Iterable it) {
+    if (isSubtipe(it)) {
+      final type = Style("${(it as List)[0]}")
+        ..fg(Color('79'))
+        ..underline();
+      final fields = setTaskFieds(it[1], 2);
+      return "$type: ${Platform.lineTerminator}$fields";
+    }
     if (it.length > 10) {
       final str = it
           .take(30)
-          .map(styledValue)
+          .map(_styledValue)
           .toList()
           .toString()
           .replaceFirst(']', '');
@@ -41,7 +58,18 @@ class Colorist {
       return "${strArr.join(',').trim()}${it.length > 30 ? ', ... ]' : ' ]'}";
     }
 
-    return it.map(styledValue).toList().toString();
+    return it.map(_styledValue).toList().toString();
+  }
+
+  String setTaskFieds(Map fields, [int addSpace = 0]) {
+    final buf = StringBuffer();
+    for (final MapEntry(key: name, value: value) in fields.entries) {
+      final sn = Style("$name")..fg(Color.brightYellow);
+      final sv = _styledValue(value);
+      buf.writeln("${' ' * addSpace}    $sn: $sv");
+    }
+
+    return buf.toString();
   }
 
   String _styledMap(Map m) {
@@ -49,7 +77,7 @@ class Colorist {
     if (im.length > 7) {
       final rm = Map.fromEntries(im
           .take(18)
-          .map((e) => MapEntry(styledValue(e.key), styledValue(e.value))));
+          .map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value))));
 
       final srm = rm.toString().replaceFirst("}", '');
       List<String> srArr = srm.split(',');
@@ -66,7 +94,7 @@ class Colorist {
     }
 
     return Map.fromEntries(
-            im.map((e) => MapEntry(styledValue(e.key), styledValue(e.value))))
+            im.map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value))))
         .toString();
   }
 
@@ -84,13 +112,19 @@ class Colorist {
       });
     }
 
-    buff = buff.replaceAllMapped(
-        RegExp("( |\\()$stdTypes( |)"), (m) {
-        final x = RegExp(stdTypes).firstMatch(m[0]!)![0]!;
-        return m[0]!.replaceFirst(x, "${Style(x)..fg(Color.green)}");
-      });
+    buff = buff.replaceAllMapped(RegExp("( |\\()$stdTypes( |)"), (m) {
+      final x = RegExp(stdTypes).firstMatch(m[0]!)![0]!;
+      return m[0]!.replaceFirst(x, "${Style(x)..fg(Color.green)}");
+    });
 
     _cache[key] = buff;
     return buff;
+  }
+
+  bool isSubtipe(Object fields) {
+    return fields is List &&
+        fields.length == 2 &&
+        fields[0] is String &&
+        fields[1] is Map;
   }
 }
