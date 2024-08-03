@@ -1,13 +1,16 @@
 import 'dart:io';
 
+import 'package:plcart_cli/src/tui/fields_finder.dart';
 import 'package:plcart_cli/src/tui/methods_finder.dart';
 import 'package:termlib/termlib.dart';
+
+
 
 class Colorist {
   static final stdTypes = "(void|bool|int|double|List|Map|Set|Iterable|String)";
 
   final _methondFinder = MethodsFinder();
-  final _cache = <String, String>{};
+  final _cache = <String, FieldsFinder>{};
 
   Object _styledValue(value) {
     return switch (value) {
@@ -98,9 +101,12 @@ class Colorist {
         .toString();
   }
 
-  String paintMethods(String key, String buff, [String? name]) {
+  String paintSrc(String key, String buff, Map<String, dynamic> fields) {
+    for (var fKey in fields.keys) {
+      fields[fKey] = Style(_styledValue(fields[fKey]).toString());
+    }
     if (_cache[key] != null) {
-      return _cache[key]!;
+      return _cache[key]!.insertFields(fields);
     }
     _methondFinder.clear();
     _methondFinder.findMethods(buff);
@@ -117,8 +123,10 @@ class Colorist {
       return m[0]!.replaceFirst(x, "${Style(x)..fg(Color.green)}");
     });
 
-    _cache[key] = buff;
-    return buff;
+    _cache[key] = FieldsFinder(buff, fields.keys);
+    _cache[key]!.seatch();
+    _cache[key]!.prepare();
+    return _cache[key]!.insertFields(fields);
   }
 
   bool isSubtipe(Object fields) {

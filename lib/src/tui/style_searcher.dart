@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:termansi/termansi.dart' as ansi;
 
 class StyleResult {
@@ -28,7 +26,6 @@ class StyleResult {
 }
 
 class StyleSearcher {
-
   List<StyleResult> search(String str) {
     final regexp = RegExp("[0-9]{1,2}m");
     final stylesList = str.split("${ansi.CSI}0m");

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:plcart_cli/src/tui/colorist.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
@@ -26,7 +27,11 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
         super(width, height, letf, top);
 
   @override
-  void setKeyEvent(KeyEvent event) {}
+  void setKeyEvent(KeyEvent event) {
+    //TODO:
+    UnimplementedError();
+    _tx.add(ForseValue());
+  }
 
   @override
   void setChanels(Stream<Map> rx, StreamSink<ForseValue>? tx) {
@@ -34,8 +39,9 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
 
     rx.listen((e) async {
       _buffer.clear();
-
+      Map? f1;
       for (final MapEntry(key: taskName, value: fields) in e.entries) {
+        f1 ??= fields[1];
         final s = Style("$taskName:")
           ..bold()
           ..fg(Color('81'))
@@ -50,8 +56,8 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
 
       _buffer.writeln("____________\n");
       _buffer.writeln(
-        _colorist.paintMethods(
-            e.keys.firstOrNull, await _grep.search(e.keys.firstOrNull)),
+        _colorist.paintSrc(
+            e.keys.firstOrNull, await _grep.search(e.keys.firstOrNull), f1!.cast()),
       );
     });
   }
@@ -63,6 +69,16 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
       return;
     }
 
-    lib.writeAt(contentTop(), contentLeft(), _buffer.toString());
+    for (var (i, e) in _bufferPreparation().indexed) {
+      lib.writeAt(contentTop(i), contentLeft(), e);
+    }
+  }
+
+  List<String> _bufferPreparation() {
+    return _buffer
+        .toString()
+        .split(Platform.lineTerminator)
+        .take(contentWidth())
+        .toList();
   }
 }

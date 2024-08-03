@@ -2,13 +2,12 @@ import 'package:plcart_cli/src/tui/brackets.dart';
 
 class MethodsFinderResult {
   final String name;
-  final String body;
 
-  MethodsFinderResult(this.name, this.body);
+  MethodsFinderResult(this.name);
 
   @override
   String toString() {
-    return {'name': name, 'body': body}.toString();
+    return {'name': name}.toString();
   }
 }
 
@@ -26,7 +25,7 @@ class MethodsFinder with Bracket {
     final end = brackets(body);
     body = body.substring(0, end);
 
-    _methods.add(MethodsFinderResult(name, body));
+    _methods.add(MethodsFinderResult(name));
     final methods = <String>[];
     for (var match
         in RegExp('( |\${)[A-Z,a-z,0-9,_]+\\(.*\\)( |;)').allMatches(body)) {
@@ -37,7 +36,7 @@ class MethodsFinder with Bracket {
       if (m == null) {
         return;
       }
-      
+
       methods.add(name.substring(m.start, m.end));
     }
 

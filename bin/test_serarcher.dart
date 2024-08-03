@@ -27,10 +27,10 @@ void main(List<String> args) {
   }
 
   print(searcher
-    .search(sb.toString())
-    .map((e) => e.toStyledChars())
-    .expand((x) => x)
-    .toList());
+      .search(sb.toString())
+      .map((e) => e.toStyledChars())
+      .expand((x) => x)
+      .toList());
 }
 
 void _setTaskFieds(Map fields) {

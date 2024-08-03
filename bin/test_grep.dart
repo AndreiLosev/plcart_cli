@@ -1,20 +1,20 @@
 import 'package:plcart_cli/src/tui/colorist.dart';
+import 'package:plcart_cli/src/tui/fields_finder.dart';
 import 'package:plcart_cli/src/tui/grep.dart';
-import 'package:plcart_cli/src/tui/methods_finder.dart';
-import 'package:termlib/termlib.dart';
 
 void main(List<String> args) async {
+  final f = {
+    'bb1': false,
+    'xx2': 15,
+    'yy3': 13.48,
+    'ss4': "hello world",
+    'll5': [1, 2, true, 'dasa'],
+    'mm6': {'q': 1, 'w': 2},
+  };
   final grep = Grep("/home/andrei/documents/my/plcartProject/test1");
   final c = Colorist();
   final x = await grep.search('MyTaskImp');
+  final y = c.paintSrc('MyTaskImp', x, f);
 
-  // print(x);
-  final x1 = c.paintMethods('qwe', x);
-  print(x1);
-
-  // final y1 = x.replaceAllMapped(RegExp("incrimet\\(.*\\)( |;)"), (m) {
-  //   final s = Style('incrimet')..fg(Color.blue);
-  //   return m[0]!.replaceFirst('incrimet', s.toString());
-  // });
-  // print(y1);
+  print(y);
 }
