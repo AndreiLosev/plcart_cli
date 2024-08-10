@@ -1,5 +1,4 @@
 import 'package:plcart_cli/src/tui/colorist.dart';
-import 'package:plcart_cli/src/tui/fields_finder.dart';
 import 'package:plcart_cli/src/tui/grep.dart';
 
 void main(List<String> args) async {
@@ -8,8 +7,12 @@ void main(List<String> args) async {
     'xx2': 15,
     'yy3': 13.48,
     'ss4': "hello world",
-    'll5': [1, 2, true, 'dasa'],
-    'mm6': {'q': 1, 'w': 2},
+    'll5': [false, 45, 0.1, 'dasa'],
+    'mm6': {'key11': 33},
+    'timer': [
+      "TOn",
+      {'in1': true}
+    ],
   };
   final grep = Grep("/home/andrei/documents/my/plcartProject/test1");
   final c = Colorist();

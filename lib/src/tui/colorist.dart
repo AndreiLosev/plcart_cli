@@ -4,8 +4,6 @@ import 'package:plcart_cli/src/tui/fields_finder.dart';
 import 'package:plcart_cli/src/tui/methods_finder.dart';
 import 'package:termlib/termlib.dart';
 
-
-
 class Colorist {
   static final stdTypes = "(void|bool|int|double|List|Map|Set|Iterable|String)";
 
@@ -20,6 +18,18 @@ class Colorist {
       String() => _styledString(value),
       Iterable() => _styledIterable(value),
       Map() => _styledMap(value),
+      _ => value,
+    };
+  }
+
+  Object _styledValueShortCollection(value, collectionKey) {
+    return switch (value) {
+      bool() => Style(value.toString())..fg(Color.red),
+      int() => Style(value.toString())..fg(Color.cyan),
+      double() => Style(value.toStringAsFixed(4))..fg(Color.magenta),
+      String() => _styledString(value),
+      Iterable() => _styledIterableShort(value, collectionKey),
+      Map() => _styledValueShortMap(value, collectionKey),
       _ => value,
     };
   }
@@ -64,6 +74,29 @@ class Colorist {
     return it.map(_styledValue).toList().toString();
   }
 
+  String _styledIterableShort(Iterable it, int? index) {
+    if (isSubtipe(it)) {
+      final type = Style("${(it as List)[0]}")
+        ..fg(Color('79'))
+        ..underline();
+      return type.toString();
+    }
+
+    if (index != null) {
+      return _styledValue((it as List)[index]).toString();
+    }
+
+    return (Style("[ ... ]")..fg(Color.magenta)).toString();
+  }
+
+  String _styledValueShortMap(Map m, Object? collectionKey) {
+    if (collectionKey != null) {
+      return _styledValue(m[collectionKey]).toString();
+    }
+
+    return (Style("{ ... }")..fg(Color.magenta)).toString();
+  }
+
   String setTaskFieds(Map fields, [int addSpace = 0]) {
     final buf = StringBuffer();
     for (final MapEntry(key: name, value: value) in fields.entries) {
@@ -102,11 +135,8 @@ class Colorist {
   }
 
   String paintSrc(String key, String buff, Map<String, dynamic> fields) {
-    for (var fKey in fields.keys) {
-      fields[fKey] = Style(_styledValue(fields[fKey]).toString());
-    }
     if (_cache[key] != null) {
-      return _cache[key]!.insertFields(fields);
+      return _cache[key]!.insertFields(fields, _styledValueShortCollection);
     }
     _methondFinder.clear();
     _methondFinder.findMethods(buff);
@@ -126,7 +156,7 @@ class Colorist {
     _cache[key] = FieldsFinder(buff, fields.keys);
     _cache[key]!.seatch();
     _cache[key]!.prepare();
-    return _cache[key]!.insertFields(fields);
+    return _cache[key]!.insertFields(fields, _styledValueShortCollection);
   }
 
   bool isSubtipe(Object fields) {

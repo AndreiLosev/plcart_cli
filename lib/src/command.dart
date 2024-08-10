@@ -14,17 +14,18 @@ class Command {
     final soket = await Socket.connect(host, 11223);
     final client = Client(soket);
     final debugClient = DebugClient(client);
-    // debugClient.verbose = true;
+    debugClient.verbose = true;
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
-    final main = MainTidget(path: '/home/andrei/documents/my/plcartProject/test1/');
+    final main =
+        MainTidget(path: '/home/andrei/documents/my/plcartProject/test1/');
     final console = Console();
 
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
     events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);
     console.setChanels(debugClient.consoleRx.stream, null);
     main.setChanels(debugClient.mainRx.stream, debugClient.mainTx.sink);
-    
+
     final app = TuiApp()
       ..addTiget(tasks)
       ..addTiget(events)
