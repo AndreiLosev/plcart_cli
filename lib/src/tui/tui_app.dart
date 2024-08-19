@@ -14,6 +14,7 @@ class TuiApp {
   bool _run = true;
   final _debugConsole = Queue<String>();
   final _endCallbecks = <Function>[];
+  final _renderCallbecks = <Function>[];
 
   int? addTiget(ITidget tiget) {
     _tigets.add(tiget);
@@ -31,6 +32,10 @@ class TuiApp {
 
   void addEndCallback(Function fn) {
     _endCallbecks.add(fn);
+  }
+
+  void addRednerCallback(Function fn) {
+    _renderCallbecks.add(fn);
   }
 
   Future<void> listen() async {
@@ -76,6 +81,10 @@ class TuiApp {
 
       for (var item in _tigets) {
         item.render(_shadowConsole);
+      }
+
+      for (var fn in _renderCallbecks) {
+        fn();
       }
 
       _shadowConsole.comparete();

@@ -30,17 +30,12 @@ class Command {
       ..addTiget(tasks)
       ..addTiget(events)
       ..addTiget(main)
-      ..addTiget(console);
+      ..addTiget(console)
+      ..addRednerCallback(() => Layout.applay(events, tasks, main, console))
+      ..addEndCallback(debugClient.stop);
 
     app.listen();
     app.render();
-
-    final lt = Timer.periodic(Duration(seconds: 2), (_) {
-      Layout.applay(events, tasks, main, console);
-    });
-
-    app.addEndCallback(lt.cancel);
-    app.addEndCallback(debugClient.stop);
 
     debugClient.subscribe();
     await debugClient.start();

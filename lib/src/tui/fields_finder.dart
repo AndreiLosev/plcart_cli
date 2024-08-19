@@ -80,15 +80,29 @@ class FieldsFinder {
   }
 
   (int, int)? _findCollectionKey(int start) {
-    late int open;
+    int? open;
+    // [].last
     for (var i = start; i < _methodBody.length; i++) {
       switch (_methodBody[i]) {
-        case ";" || "\n":
+        case ";" || "\n" || '+' || '-' || '=' || '*' || '/':
           return null;
-        case "[":
+        case "[" || "f" || "l":
           open = i;
         case "]":
+          if (open == null) {
+            return null;
+          }
           return (open, i);
+        case "t":
+          if (open == null) {
+            return null;
+          }
+          switch (_methodBody.substring(open, i)) {
+            case "first" || "last":
+              return (open, i);
+            default:
+              return null;
+          }
       }
     }
 
