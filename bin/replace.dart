@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:plcart_cli/src/tui/colorist.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
 import 'package:termlib/termlib.dart';
 
 void main(List<String> args) {
@@ -25,20 +25,21 @@ void main(List<String> args) {
       ],
     }
   ];
-  
+
   final buffer = StringBuffer();
-  for (final MapEntry(key: taskName, value: fields) in {'TestTask': data}.entries) {
-        final s = Style("$taskName:")
-          ..bold()
-          ..fg(Color('81'))
-          ..underline();
-        buffer.writeln("  $s");
-        if (c.isSubtipe(fields)) {
-          buffer.writeln(c.setTaskFieds(fields[1] as Map));
-        } else {
-          buffer.writeln(c.setTaskFieds(fields as Map));
-        }
-      }
+  for (final MapEntry(key: taskName, value: fields)
+      in {'TestTask': data}.entries) {
+    final s = Style("$taskName:")
+      ..bold()
+      ..fg(Color('81'))
+      ..underline();
+    buffer.writeln("  $s");
+    if (c.isSubtipe(fields)) {
+      buffer.writeln(c.setTaskFieds(fields[1] as Map));
+    } else {
+      buffer.writeln(c.setTaskFieds(fields as Map));
+    }
+  }
 
   for (var e in buffer.toString().split(Platform.lineTerminator)) {
     print(e);

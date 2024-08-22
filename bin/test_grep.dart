@@ -1,5 +1,5 @@
-import 'package:plcart_cli/src/tui/colorist.dart';
-import 'package:plcart_cli/src/tui/grep.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
 
 void main(List<String> args) async {
   final f = {
