@@ -14,7 +14,7 @@ class Command {
     final soket = await Socket.connect(host, 11223);
     final client = Client(soket);
     final debugClient = DebugClient(client);
-    debugClient.verbose = true;
+    debugClient.verbose = false;
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
     final main =

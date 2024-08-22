@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:plcart_cli/src/tui/brackets.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/brackets.dart';
 
 class Grep with Bracket {
   final _cache = <String, String>{};
@@ -66,7 +66,7 @@ class Grep with Bracket {
       return null;
     }
     content = content.substring(match.end + 1);
-  
+
     final end = brackets(content);
     return content.substring(0, end);
   }

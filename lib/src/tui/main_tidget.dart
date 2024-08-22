@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:plcart_cli/src/tui/colorist.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
-import 'package:plcart_cli/src/tui/grep.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:termlib/termlib.dart';
 import 'package:termparser/termparser_events.dart';
@@ -16,6 +16,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   final _buffer = StringBuffer();
   final Grep _grep;
   final _colorist = Colorist();
+  int _midline = 0;
 
   MainTidget({
     int width = 30,
@@ -56,8 +57,8 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
 
       _buffer.writeln("____________\n");
       _buffer.writeln(
-        _colorist.paintSrc(
-            e.keys.firstOrNull, await _grep.search(e.keys.firstOrNull), f1!.cast()),
+        _colorist.paintSrc(e.keys.firstOrNull,
+            await _grep.search(e.keys.firstOrNull), f1!.cast()),
       );
     });
   }
@@ -65,6 +66,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   @override
   void render(ShadowConsole lib) {
     super.render(lib);
+    _renderMiline(lib);
     if (_buffer.isEmpty) {
       return;
     }
@@ -80,5 +82,12 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
         .split(Platform.lineTerminator)
         .take(contentWidth())
         .toList();
+  }
+
+  void _renderMiline(ShadowConsole lib) {
+    _midline = (super.letf + super.width) ~/ 2;
+    for (var i = 0; i < super.height - 1; i++) {
+      lib.writeAt(top + i + 1, _midline, "|>");
+    }
   }
 }

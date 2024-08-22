@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:plcart_cli/src/tui/fields_finder.dart';
-import 'package:plcart_cli/src/tui/methods_finder.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/fields_finder.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/methods_finder.dart';
 import 'package:termlib/termlib.dart';
 
 class Colorist {

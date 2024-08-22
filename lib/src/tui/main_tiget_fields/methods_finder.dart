@@ -1,4 +1,4 @@
-import 'package:plcart_cli/src/tui/brackets.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/brackets.dart';
 
 class MethodsFinderResult {
   final String name;
