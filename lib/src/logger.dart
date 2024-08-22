@@ -30,6 +30,6 @@ class _Logger {
   }
 }
 
-void log(Object o) {
+void flog(Object o) {
   _Logger().log(o);
 }
