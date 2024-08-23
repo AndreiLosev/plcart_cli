@@ -141,6 +141,10 @@ class Colorist {
     _methondFinder.clear();
     _methondFinder.findMethods(buff);
 
+    buff = _methondFinder.methods
+        .map((m) => m.displayBody)
+        .join("${Platform.lineTerminator}${Platform.lineTerminator}");
+
     for (var method in _methondFinder.methods) {
       buff = buff.replaceAllMapped(RegExp(" ${method.name}\\(.*\\)( |;)"), (m) {
         final s = Style(method.name)..fg(Color.blue);
