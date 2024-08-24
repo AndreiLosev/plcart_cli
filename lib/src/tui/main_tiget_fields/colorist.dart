@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:plcart_cli/src/tui/main_tiget_fields/fields_finder.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/methods_finder.dart';
 import 'package:termlib/termlib.dart';
 
@@ -74,16 +75,27 @@ class Colorist {
     return it.map(_styledValue).toList().toString();
   }
 
-  String _styledIterableShort(Iterable it, int? index) {
+  String _styledIterableShort(Iterable it, Object? index) {
     if (isSubtipe(it)) {
+      if (index != null) {
+        return _styledValue(it.toList()[1][index]).toString();
+      }
       final type = Style("${(it as List)[0]}")
         ..fg(Color('79'))
         ..underline();
       return type.toString();
     }
 
-    if (index != null) {
+    if (index is int) {
       return _styledValue((it as List)[index]).toString();
+    }
+
+    if (index is String) {
+      return switch (index) {
+        'first' => _styledValue(it.firstOrNull).toString(),
+        'last' => _styledValue(it.lastOrNull).toString(),
+        _ => (Style("[ ... ]")..fg(Color.magenta)).toString(),
+      };
     }
 
     return (Style("[ ... ]")..fg(Color.magenta)).toString();
@@ -129,9 +141,10 @@ class Colorist {
       return "${srArr.join(',').trim()}${m.length > 18 ? ', ... }' : ' }'}";
     }
 
-    return Map.fromEntries(
-            im.map((e) => MapEntry(_styledValue(e.key), _styledValue(e.value))))
-        .toString();
+    return Map.fromEntries(im.map((e) => MapEntry(
+          _styledValue(e.key),
+          _styledValue(e.value),
+        ))).toString();
   }
 
   String paintSrc(String key, String buff, Map<String, dynamic> fields) {
@@ -157,16 +170,9 @@ class Colorist {
       return m[0]!.replaceFirst(x, "${Style(x)..fg(Color.green)}");
     });
 
-    _cache[key] = FieldsFinder(buff, fields.keys);
+    _cache[key] = FieldsFinder(buff, fields);
     _cache[key]!.seatch();
     _cache[key]!.prepare();
     return _cache[key]!.insertFields(fields, _styledValueShortCollection);
-  }
-
-  bool isSubtipe(Object fields) {
-    return fields is List &&
-        fields.length == 2 &&
-        fields[0] is String &&
-        fields[1] is Map;
   }
 }

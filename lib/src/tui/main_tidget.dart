@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:plcart_cli/src/tui/style_searcher.dart';
 import 'package:termlib/termlib.dart';
@@ -158,7 +158,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     final (selectedTask, activeTask, taskFields) = _current(e);
     for (final MapEntry(key: taskName, value: fields) in e.entries) {
       _fieldsBuff.writeln(_paintActiveTask(selectedTask, activeTask, taskName));
-      if (_colorist.isSubtipe(fields)) {
+      if (isSubtipe(fields)) {
         _fieldsBuff.writeln(_colorist.setTaskFieds(fields[1]));
       } else {
         _fieldsBuff.writeln(_colorist.setTaskFieds(fields));

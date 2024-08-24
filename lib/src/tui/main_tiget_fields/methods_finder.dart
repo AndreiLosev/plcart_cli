@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:plcart_cli/src/tui/main_tiget_fields/brackets.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 
 class MethodsFinderResult {
   final String name;
@@ -17,7 +17,7 @@ class MethodsFinderResult {
   String get displayBody => "$bodyHeader${Platform.lineTerminator}$body}";
 }
 
-class MethodsFinder with Bracket {
+class MethodsFinder {
   final _methods = <MethodsFinderResult>[];
 
   void findMethods(String buff, [String? name]) {

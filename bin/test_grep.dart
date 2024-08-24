@@ -47,7 +47,7 @@ void f2() async {
         'et': "#T 2s 350ms",
       }
     ],
-    'timerPT': [
+    'timerPt': [
       "TP",
       {
         'in1': true,
@@ -56,6 +56,7 @@ void f2() async {
         'et': "#T 2s 350ms",
       }
     ],
+    'arr': List.filled(25, true)
   };
   final grep = Grep("/home/andrei/documents/my/plcartProject/test1");
   // final m = MethodsFinder();

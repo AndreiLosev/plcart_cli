@@ -1,3 +1,4 @@
+import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 import 'package:termlib/termlib.dart';
 
 final class FieldsFinderResult {
@@ -13,11 +14,13 @@ final class FieldsFinderResult {
 
 class FieldsFinder {
   final String _methodBody;
-  final Iterable<String> _keys;
+  final Map<String, dynamic> _fields;
   final _fieldsPositions = <FieldsFinderResult>[];
   final _listPieces = <String>[];
 
-  FieldsFinder(this._methodBody, this._keys);
+  FieldsFinder(this._methodBody, this._fields);
+
+  Iterable<String> get _keys => _fields.keys;
 
   void seatch() {
     for (var key in _keys) {
@@ -27,10 +30,10 @@ class FieldsFinder {
         if (match == null) {
           continue;
         }
-        final keyPostions = _findCollectionKey(match1.start);
-        final collectionkey = keyPostions != null
-            ? _methodBody.substring(keyPostions.$1 + 1, keyPostions.$2)
-            : null;
+        final collectionkey = switch (isSubtipe(_fields[key])) {
+          true => _subtipeCollKey(key, match1, _fields[key][1]),
+          false => _simepleColKey(match1),
+        };
 
         final res = FieldsFinderResult(
           match1.start + match.start,
@@ -40,6 +43,30 @@ class FieldsFinder {
         _fieldsPositions.add(res);
       }
     }
+  }
+
+  String? _simepleColKey(RegExpMatch match) {
+    final keyPostions = _findCollectionKey(match.start);
+    return keyPostions != null
+        ? _methodBody.substring(keyPostions.$1 + 1, keyPostions.$2)
+        : null;
+  }
+
+  String? _subtipeCollKey(String key, RegExpMatch match, Map value) {
+    final maxKeyLength = value.keys
+        .cast<String>()
+        .map((e) => e.length)
+        .reduce((v, e) => v > e ? v : e);
+    final buff =
+        _methodBody.substring(match.start, match.end + maxKeyLength + 1);
+
+    for (var subKey in value.keys) {
+      if (buff.contains("$key.$subKey")) {
+        return subKey;
+      }
+    }
+
+    return null;
   }
 
   void prepare() {
@@ -98,8 +125,8 @@ class FieldsFinder {
             return null;
           }
           switch (_methodBody.substring(open, i)) {
-            case "first" || "last":
-              return (open, i);
+            case "firs" || "las":
+              return (open - 1, i + 1);
             default:
               return null;
           }

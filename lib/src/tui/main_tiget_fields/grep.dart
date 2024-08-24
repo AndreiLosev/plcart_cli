@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:path/path.dart' as p;
-import 'package:plcart_cli/src/tui/main_tiget_fields/brackets.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 
-class Grep with Bracket {
+class Grep {
   final _cache = <String, String>{};
   final Directory _rootDir;
   late Completer<String> _result;
