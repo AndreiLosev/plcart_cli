@@ -96,7 +96,7 @@ class FieldsFinder {
         final (key, colKey) = _decodeKey(piece);
         final skey = Style(key)..fg(Color.brightYellow);
         buff.write(
-          " $p${setColor(fields[key], _parseColkey(colKey))}$p $skey",
+          "$p${setColor(fields[key], _parseColkey(colKey))}$p $skey",
         );
       } else {
         buff.write(piece);

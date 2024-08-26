@@ -25,9 +25,10 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   final Grep _grep;
   final _colorist = Colorist();
   final _searcher = StyleSearcher();
-  final _selectedChar = Style(">>")
-    ..bold()
-    ..fg(Color.cyan);
+  final _selectedChar = (Style(">>")
+        ..bold()
+        ..fg(Color.cyan))
+      .toString();
 
   Screen _screen = Screen.left;
   int _midline = 0;
@@ -85,9 +86,24 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   }
 
   List<String> _bufferPreparation(StringBuffer buff) {
+    int cursoreLine = 0;
+    final lines = buff.toString().split(Platform.lineTerminator).indexed;
+    for (var (i, line) in lines) {
+      if (line.trim().startsWith(_selectedChar)) {
+        cursoreLine = i;
+        break;
+      }
+    }
+
+    int scroll = 1 + cursoreLine - contentHeight();
+    if (scroll < 0) {
+      scroll = 0;
+    }
+
     return buff
         .toString()
         .split(Platform.lineTerminator)
+        .skip(scroll)
         .take(contentHeight())
         .toList();
   }
@@ -112,7 +128,13 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
 
   (String, String, Map<String, dynamic>) _current(Map e) {
     final keys = e.keys.toList();
+    if (_activeTask >= keys.length) {
+      _activeTask = keys.length - 1;
+    }
     final String activeTask = keys[_activeTask];
+    if (_cursorePosition >= keys.length) {
+      _cursorePosition = keys.length - 1;
+    }
     final String selectedTask = keys[_cursorePosition];
     final Map<String, dynamic> taskFields = {};
     for (MapEntry item in e[activeTask][1].entries) {

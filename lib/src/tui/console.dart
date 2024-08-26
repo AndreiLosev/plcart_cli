@@ -31,7 +31,7 @@ class Console extends Frame implements Interactive<dynamic, String> {
         }
       default:
     }
-    
+
     if (_scroll == 0) {
       _fixStart = null;
     }
@@ -50,16 +50,13 @@ class Console extends Frame implements Interactive<dynamic, String> {
 
   @override
   void render(ShadowConsole lib) {
-    final start = _fixStart ?? _startPos();
-    for (var i = start; i < _buffer.length; i++) {
-      final j = _index - _buffer.length + i;
-      lib.writeAt(contentTop(i - start), contentLeft(), "$j. ${_buffer[i]}");
-    }
+    lib.writeAt(contentTop(), contentLeft(), "hello world !!!");
 
     super.render(lib);
   }
 
-  int _startPos([int add = 0]) => (_buffer.length > 8 ? _buffer.length - 8 : 0) + add;
+  int _startPos([int add = 0]) =>
+      (_buffer.length > 8 ? _buffer.length - 8 : 0) + add;
 
   int _nextIndex() {
     _index += 1;

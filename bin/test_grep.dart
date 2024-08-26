@@ -1,8 +1,8 @@
 import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
-import 'package:plcart_cli/src/tui/main_tiget_fields/methods_finder.dart';
 
 void main(List<String> args) async {
+  f1();
   f2();
 }
 
