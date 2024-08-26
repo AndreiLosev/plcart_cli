@@ -35,6 +35,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   int _cursorePosition = 0;
   int _activeTask = 0;
   int _positionMax = 0;
+  List<String> _tasks = [];
 
   MainTidget({
     int width = 30,
@@ -76,7 +77,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   @override
   void render(ShadowConsole lib) {
     super.render(lib);
-    _renderMiline(lib);
+    _renderMidline(lib);
     if (_fieldsBuff.isEmpty) {
       return;
     }
@@ -85,27 +86,37 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     _renderBuffers(lib, _sourceBuff, _midline + 1);
   }
 
-  List<String> _bufferPreparation(StringBuffer buff) {
+  Iterable<String> _bufferPreparation(StringBuffer buff) {
     int cursoreLine = 0;
-    final lines = buff.toString().split(Platform.lineTerminator).indexed;
-    for (var (i, line) in lines) {
+    final lines = buff.toString().split(Platform.lineTerminator);
+
+    for (var (i, line) in lines.indexed) {
       if (line.trim().startsWith(_selectedChar)) {
         cursoreLine = i;
         break;
       }
     }
 
-    int scroll = 1 + cursoreLine - contentHeight();
+    int scroll = cursoreLine - contentHeight();
     if (scroll < 0) {
       scroll = 0;
     }
 
-    return buff
-        .toString()
-        .split(Platform.lineTerminator)
-        .skip(scroll)
-        .take(contentHeight())
-        .toList();
+    if (scroll > 0) {
+      try {
+        final nextTask = _tasks[_cursorePosition + 1];
+        for (var (i, line) in lines.skip(cursoreLine).indexed) {
+          if (line.trim().contains(nextTask)) {
+            scroll += i;
+            break;
+          }
+        }
+      } on RangeError {
+        return lines.skip(lines.length - contentHeight() - 3);
+      }
+    }
+
+    return lines.skip(scroll).take(contentHeight());
   }
 
   void _renderBuffers(ShadowConsole lib, StringBuffer buff, int left) {
@@ -119,7 +130,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     }
   }
 
-  void _renderMiline(ShadowConsole lib) {
+  void _renderMidline(ShadowConsole lib) {
     _midline = (super.letf + super.width) ~/ 2;
     for (var i = 0; i < super.height - 1; i++) {
       lib.writeAt(top + i + 1, _midline, "│");
@@ -127,15 +138,14 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   }
 
   (String, String, Map<String, dynamic>) _current(Map e) {
-    final keys = e.keys.toList();
-    if (_activeTask >= keys.length) {
-      _activeTask = keys.length - 1;
+    if (_activeTask >= _tasks.length) {
+      _activeTask = _tasks.length - 1;
     }
-    final String activeTask = keys[_activeTask];
-    if (_cursorePosition >= keys.length) {
-      _cursorePosition = keys.length - 1;
+    final String activeTask = _tasks[_activeTask];
+    if (_cursorePosition >= _tasks.length) {
+      _cursorePosition = _tasks.length - 1;
     }
-    final String selectedTask = keys[_cursorePosition];
+    final String selectedTask = _tasks[_cursorePosition];
     final Map<String, dynamic> taskFields = {};
     for (MapEntry item in e[activeTask][1].entries) {
       taskFields[item.key] = item.value;
@@ -177,6 +187,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     _sourceBuff.clear();
 
     _setExtroCursorPosition(e);
+    _tasks = (e as Map).keys.cast<String>().toList();
     final (selectedTask, activeTask, taskFields) = _current(e);
     for (final MapEntry(key: taskName, value: fields) in e.entries) {
       _fieldsBuff.writeln(_paintActiveTask(selectedTask, activeTask, taskName));
