@@ -13,9 +13,30 @@ import 'package:termparser/termparser_events.dart';
 
 class ForseValue {}
 
+final _midlineLeft = "${Style("│")..fg(Color.green)}│";
+final _midlineRight = "│${Style("│")..fg(Color.green)}";
+
 enum Screen {
   left,
   right;
+
+  String get value => switch (this) {
+        Screen.left => _midlineLeft,
+        Screen.right => _midlineRight,
+      };
+
+  int get offset => switch (this) {
+        Screen.left => -2,
+        Screen.right => -2,
+      };
+
+  void leftCursore(Style s) {
+    switch (this) {
+      case Screen.left:
+        s.reverse();
+      case Screen.right:
+    }
+  }
 }
 
 class MainTidget extends Frame implements Interactive<ForseValue, Map> {
@@ -48,19 +69,23 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
 
   @override
   void setKeyEvent(KeyEvent event) {
-    switch (event.code.name) {
-      case KeyCodeName.up:
+    switch ((event.code.name, _screen)) {
+      case (KeyCodeName.up, Screen.left):
         _cursorePosition--;
         if ((_cursorePosition) < 0) {
           _cursorePosition = 0;
         }
-      case KeyCodeName.down:
+      case (KeyCodeName.down, Screen.left):
         _cursorePosition++;
         if ((_cursorePosition) >= _positionMax) {
           _cursorePosition = _positionMax - 1;
         }
-      case KeyCodeName.enter:
+      case (KeyCodeName.enter, Screen.left):
         _activeTask = _cursorePosition;
+      case (KeyCodeName.left, _):
+        _screen = Screen.left;
+      case (KeyCodeName.right, _):
+        _screen = Screen.right;
       default:
     }
 
@@ -77,13 +102,13 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   @override
   void render(ShadowConsole lib) {
     super.render(lib);
-    _renderMidline(lib);
     if (_fieldsBuff.isEmpty) {
       return;
     }
 
     _renderBuffers(lib, _fieldsBuff, contentLeft(-1));
     _renderBuffers(lib, _sourceBuff, _midline + 1);
+    _renderMidline(lib);
   }
 
   Iterable<String> _bufferPreparation(StringBuffer buff) {
@@ -131,9 +156,9 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   }
 
   void _renderMidline(ShadowConsole lib) {
-    _midline = (super.letf + super.width) ~/ 2;
+    _midline = (super.letf + super.width) ~/ 2 + _screen.offset;
     for (var i = 0; i < super.height - 1; i++) {
-      lib.writeAt(top + i + 1, _midline, "│");
+      lib.writeAt(top + i + 1, _midline, _screen.value);
     }
   }
 
@@ -214,7 +239,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
       ..underline();
 
     if (selectedTask == taskName) {
-      s.reverse();
+      _screen.leftCursore(s);
       return "$_selectedChar $s";
     }
 
