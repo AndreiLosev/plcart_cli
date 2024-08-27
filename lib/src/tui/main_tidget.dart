@@ -15,19 +15,16 @@ class ForseValue {}
 
 final _midlineLeft = "${Style("│")..fg(Color.green)}│";
 final _midlineRight = "│${Style("│")..fg(Color.green)}";
+final _disabled = "││";
 
 enum Screen {
   left,
   right;
 
-  String get value => switch (this) {
-        Screen.left => _midlineLeft,
-        Screen.right => _midlineRight,
-      };
-
-  int get offset => switch (this) {
-        Screen.left => -2,
-        Screen.right => -2,
+  String value(bool active) => switch ((active, this)) {
+        (true, Screen.left) => _midlineLeft,
+        (true, Screen.right) => _midlineRight,
+        _ => _disabled,
       };
 
   void leftCursore(Style s) {
@@ -156,9 +153,9 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   }
 
   void _renderMidline(ShadowConsole lib) {
-    _midline = (super.letf + super.width) ~/ 2 + _screen.offset;
+    _midline = (super.letf + super.width) ~/ 2 - 2;
     for (var i = 0; i < super.height - 1; i++) {
-      lib.writeAt(top + i + 1, _midline, _screen.value);
+      lib.writeAt(top + i + 1, _midline, _screen.value(focuse));
     }
   }
 
