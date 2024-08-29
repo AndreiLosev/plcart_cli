@@ -54,6 +54,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   int _activeTask = 0;
   int _positionMax = 0;
   List<String> _tasks = [];
+  int _srcScroll = 0;
 
   MainTidget({
     int width = 30,
@@ -79,6 +80,12 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
         }
       case (KeyCodeName.enter, Screen.left):
         _activeTask = _cursorePosition;
+      case (KeyCodeName.up, Screen.right):
+        if (_srcScroll > 0) {
+          _srcScroll--;
+        }
+      case (KeyCodeName.down, Screen.right):
+        _srcScroll++;
       case (KeyCodeName.left, _):
         _screen = Screen.left;
       case (KeyCodeName.right, _):
@@ -103,14 +110,14 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
       return;
     }
 
-    _renderBuffers(lib, _fieldsBuff, contentLeft(-1));
-    _renderBuffers(lib, _sourceBuff, _midline + 1);
+    _renderBuffers(lib, _fieldsBufferPreparation(), contentLeft(-1));
+    _renderBuffers(lib, _srcBufferPreparation(), _midline + 1);
     _renderMidline(lib);
   }
 
-  Iterable<String> _bufferPreparation(StringBuffer buff) {
+  Iterable<String> _fieldsBufferPreparation() {
     int cursoreLine = 0;
-    final lines = buff.toString().split(Platform.lineTerminator);
+    final lines = _fieldsBuff.toString().split(Platform.lineTerminator);
 
     for (var (i, line) in lines.indexed) {
       if (line.trim().startsWith(_selectedChar)) {
@@ -141,9 +148,18 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     return lines.skip(scroll).take(contentHeight());
   }
 
-  void _renderBuffers(ShadowConsole lib, StringBuffer buff, int left) {
+  Iterable<String> _srcBufferPreparation() {
+    final lines = _sourceBuff.toString().split(Platform.lineTerminator);
+    if ((lines.length - 3) < _srcScroll) {
+      _srcScroll = lines.length - 3;
+    }
+
+    return lines.skip(_srcScroll).take(contentHeight());
+  }
+
+  void _renderBuffers(ShadowConsole lib, Iterable<String> buff, int left) {
     final width = _midline - 1;
-    for (var (i, e) in _bufferPreparation(buff).indexed) {
+    for (var (i, e) in buff.indexed) {
       final text = switch (width > e.length) {
         true => e,
         false => _substringStyled(e, width),
