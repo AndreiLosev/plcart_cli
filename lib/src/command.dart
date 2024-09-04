@@ -66,8 +66,9 @@ class Command {
     debugClient.verbose = false;
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
-    final main = MainTidget(path: _workDir);
     final console = Console();
+
+    final main = MainTidget(path: _workDir, console: console);
 
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
     events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);
@@ -78,7 +79,6 @@ class Command {
       ..addTiget(tasks)
       ..addTiget(events)
       ..addTiget(main)
-      ..addTiget(console)
       ..addRednerCallback(() => Layout.applay(events, tasks, main, console))
       ..addEndCallback(debugClient.stop);
 

@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:plcart_cli/src/logger.dart';
+import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
@@ -37,6 +39,7 @@ enum Screen {
 }
 
 class MainTidget extends Frame implements Interactive<ForseValue, Map> {
+  final Console _console;
   late final StreamSink<ForseValue> _tx;
   final _fieldsBuff = StringBuffer();
   final _sourceBuff = StringBuffer();
@@ -54,6 +57,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   int _activeTask = 0;
   int _positionMax = 0;
   List<String> _tasks = [];
+  List<String> _taskFields = [];
   int _srcScroll = 0;
 
   MainTidget({
@@ -62,34 +66,44 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     int letf = 10,
     int top = 10,
     required String path,
+    required Console console,
   })  : _grep = Grep(path),
+        _console = console,
         super(width, height, letf, top);
 
   @override
   void setKeyEvent(KeyEvent event) {
-    switch ((event.code.name, _screen)) {
-      case (KeyCodeName.up, Screen.left):
+    switch ((event.code.name, _screen, _console.focuse, event.code.char)) {
+      case (KeyCodeName.up, Screen.left, false, ''):
         _cursorePosition--;
         if ((_cursorePosition) < 0) {
           _cursorePosition = 0;
         }
-      case (KeyCodeName.down, Screen.left):
+      case (KeyCodeName.down, Screen.left, false, ''):
         _cursorePosition++;
         if ((_cursorePosition) >= _positionMax) {
           _cursorePosition = _positionMax - 1;
         }
-      case (KeyCodeName.enter, Screen.left):
+      case (KeyCodeName.enter, Screen.left, false, ''):
         _activeTask = _cursorePosition;
-      case (KeyCodeName.up, Screen.right):
+      case (KeyCodeName.up, Screen.right, false, ''):
         if (_srcScroll > 0) {
           _srcScroll--;
         }
-      case (KeyCodeName.down, Screen.right):
+      case (KeyCodeName.down, Screen.right, false, ''):
         _srcScroll++;
-      case (KeyCodeName.left, _):
+      case (KeyCodeName.left, _, false, ''):
         _screen = Screen.left;
-      case (KeyCodeName.right, _):
+      case (KeyCodeName.right, _, false, ''):
         _screen = Screen.right;
+      case (KeyCodeName.escape, Screen.left, true, ''):
+        _console.focuse = false;
+        _console.clear();
+      case (_, Screen.left, false, 'e'):
+        _console.focuse = true;
+        _console.setFields(_taskFields);
+      case (_, Screen.left, true, _):
+        _console.setKeyEvent(event);
       default:
     }
 
@@ -113,6 +127,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     _renderBuffers(lib, _fieldsBufferPreparation(), contentLeft(-1));
     _renderBuffers(lib, _srcBufferPreparation(), _midline + 1);
     _renderMidline(lib);
+    _console.render(lib);
   }
 
   Iterable<String> _fieldsBufferPreparation() {
@@ -154,7 +169,11 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
       _srcScroll = lines.length - 3;
     }
 
-    return lines.skip(_srcScroll).take(contentHeight());
+    try {
+      return lines.skip(_srcScroll).take(contentHeight());
+    } on RangeError {
+      return lines;
+    }
   }
 
   void _renderBuffers(ShadowConsole lib, Iterable<String> buff, int left) {
@@ -227,6 +246,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     _setExtroCursorPosition(e);
     _tasks = (e as Map).keys.cast<String>().toList();
     final (selectedTask, activeTask, taskFields) = _current(e);
+    _taskFields = (e[selectedTask][1] as Map).keys.toList().cast();
     for (final MapEntry(key: taskName, value: fields) in e.entries) {
       _fieldsBuff.writeln(_paintActiveTask(selectedTask, activeTask, taskName));
       if (isSubtipe(fields)) {
