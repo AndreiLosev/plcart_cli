@@ -8,8 +8,8 @@ import 'package:termparser/termparser_events.dart';
 
 class Completion extends Frame
     implements Interactive<String, Iterable<String>> {
-  Iterable<String> _fields = [];
-  Iterable<String> _filteredFirelds = [];
+  Iterable<String> _fields = Iterable.empty();
+  Iterable<String> _filteredFirelds = Iterable.empty();
   int _cursore = 0;
   late final StreamSink<String> _tx;
 

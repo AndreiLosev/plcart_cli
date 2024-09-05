@@ -1,19 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
+import 'package:plcart_cli/src/tui/main_tiget_fields/forse_value.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
 import 'package:plcart_cli/src/tui/style_searcher.dart';
 import 'package:termlib/termlib.dart';
 import 'package:termparser/termparser_events.dart';
-
-class ForseValue {}
 
 final _midlineLeft = "${Style("│")..fg(Color.green)}│";
 final _midlineRight = "│${Style("│")..fg(Color.green)}";

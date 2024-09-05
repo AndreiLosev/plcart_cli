@@ -18,6 +18,7 @@ class Console extends Frame implements Interactive<String, Iterable<String>> {
   final _completionFieldsTx = StreamController<String>();
   final _buffer = <String>[];
   int _carriagePosition = 0;
+  late final StreamSink<String> _senderProt;
 
   Console({
     int width = 10,
@@ -56,8 +57,15 @@ class Console extends Frame implements Interactive<String, Iterable<String>> {
         if (_carriagePosition < _buffer.length) {
           _carriagePosition += 1;
         }
-      case (KeyCodeName.tab || KeyCodeName.enter):
+      case KeyCodeName.tab:
         _completionFields.setKeyEvent(event);
+      case KeyCodeName.enter:
+        if (_completionFields.preparationRender(left, top, _buffer.join())) {
+          _completionFields.setKeyEvent(event);
+          return;
+        }
+
+        _senderProt.add(_buffer.join());
       default:
     }
   }
@@ -110,8 +118,9 @@ class Console extends Frame implements Interactive<String, Iterable<String>> {
   }
 
   @override
-  void setChanels(Stream<Iterable<String>> rx, _) {
+  void setChanels(Stream<Iterable<String>> rx, StreamSink<String>? tx) {
     _completionFieldsRx.addStream(rx);
+    _senderProt = tx!;
   }
 
   @override
