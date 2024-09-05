@@ -18,21 +18,21 @@ class Layout {
     final eventHieght = hieght - taskHieght - 3;
 
     tasks.top = 1;
-    tasks.letf = width - w - 2;
+    tasks.left = width - w - 2;
     tasks.width = w;
     tasks.height = taskHieght;
 
     events.top = hieght - eventHieght - 1;
-    events.letf = width - w - 2;
+    events.left = width - w - 2;
     events.width = w;
     events.height = eventHieght;
 
     main.top = 1;
-    main.letf = 1;
+    main.left = 1;
     main.width = width - tasks.width - 5;
     main.height = hieght - 4;
 
-    conosle.letf = 1;
+    conosle.left = 1;
     conosle.top = main.height + 1;
     conosle.width = width - tasks.width - 5;
     conosle.height = 2;

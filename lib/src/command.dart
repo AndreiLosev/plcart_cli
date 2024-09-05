@@ -72,7 +72,6 @@ class Command {
 
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
     events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);
-    console.setChanels(debugClient.consoleRx.stream, null);
     main.setChanels(debugClient.mainRx.stream, debugClient.mainTx.sink);
 
     final app = TuiApp()

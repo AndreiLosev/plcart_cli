@@ -40,6 +40,7 @@ enum Screen {
 
 class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   final Console _console;
+  final _consoleStream = StreamController<Iterable<String>>();
   late final StreamSink<ForseValue> _tx;
   final _fieldsBuff = StringBuffer();
   final _sourceBuff = StringBuffer();
@@ -69,7 +70,9 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     required Console console,
   })  : _grep = Grep(path),
         _console = console,
-        super(width, height, letf, top);
+        super(width, height, letf, top) {
+    _console.setChanels(_consoleStream.stream, null);
+  }
 
   @override
   void setKeyEvent(KeyEvent event) {
@@ -101,7 +104,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
         _console.clear();
       case (_, Screen.left, false, 'e'):
         _console.focuse = true;
-        _console.setFields(_taskFields);
+        _consoleStream.add(_taskFields);
       case (_, Screen.left, true, _):
         _console.setKeyEvent(event);
       default:
@@ -188,7 +191,7 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   }
 
   void _renderMidline(ShadowConsole lib) {
-    _midline = (super.letf + super.width) ~/ 2 - 2;
+    _midline = (super.left + super.width) ~/ 2 - 2;
     for (var i = 0; i < super.height - 1; i++) {
       lib.writeAt(top + i + 1, _midline, _screen.value(focuse));
     }

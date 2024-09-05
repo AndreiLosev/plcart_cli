@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:plcart_cli/src/tui/completion.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
@@ -9,9 +12,10 @@ final _carriage = Style('|')
   ..fg(Color.brightBlue)
   ..bold();
 
-class Console extends Frame implements Interactive<dynamic, String> {
-  List<String> _fields = [];
-  final _completionFields = Frame(10, 10, 10, 10);
+class Console extends Frame implements Interactive<String, Iterable<String>> {
+  final _completionFields = Completion();
+  final _completionFieldsRx = StreamController<Iterable<String>>();
+  final _completionFieldsTx = StreamController<String>();
   final _buffer = <String>[];
   int _carriagePosition = 0;
 
@@ -20,7 +24,18 @@ class Console extends Frame implements Interactive<dynamic, String> {
     int height = 10,
     int letf = 10,
     int top = 10,
-  }) : super(width, height, letf, top);
+  }) : super(width, height, letf, top) {
+    _completionFields.setChanels(
+        _completionFieldsRx.stream, _completionFieldsTx.sink);
+
+    _completionFieldsTx.stream.listen((e) {
+      _buffer.clear();
+      for (var i = 0; i < e.length; i++) {
+        _buffer.add(e[i]);
+      }
+      _carriagePosition = _buffer.length;
+    });
+  }
 
   @override
   void setKeyEvent(KeyEvent event) {
@@ -41,6 +56,8 @@ class Console extends Frame implements Interactive<dynamic, String> {
         if (_carriagePosition < _buffer.length) {
           _carriagePosition += 1;
         }
+      case (KeyCodeName.tab || KeyCodeName.enter):
+        _completionFields.setKeyEvent(event);
       default:
     }
   }
@@ -48,10 +65,6 @@ class Console extends Frame implements Interactive<dynamic, String> {
   void clear() {
     _buffer.clear();
     _carriagePosition = 0;
-  }
-
-  void setFields(List<String> fields) {
-    _fields = fields;
   }
 
   void _addChar(String newCahr) {
@@ -97,8 +110,8 @@ class Console extends Frame implements Interactive<dynamic, String> {
   }
 
   @override
-  void setChanels(Stream<String> rx, _) {
-    rx.listen((e) {});
+  void setChanels(Stream<Iterable<String>> rx, _) {
+    _completionFieldsRx.addStream(rx);
   }
 
   @override
@@ -112,40 +125,17 @@ class Console extends Frame implements Interactive<dynamic, String> {
 
     super.render(lib);
 
-    if (_buffer.isEmpty) {
+    if (_buffer.isEmpty || !focuse) {
       return;
     }
 
-    if (!focuse) {
-      _fields.clear();
+    if (_completionFields.preparationRender(
+      contentLeft(),
+      top,
+      _buffer.join(),
+    )) {
+      _completionFields.render(lib);
     }
-
-    if (_fields.isEmpty) {
-      return;
-    }
-
-    final filterFileds = _fields.where((f) => f.startsWith(_buffer.join()));
-
-    if (filterFileds.isEmpty) {
-      return;
-    }
-
-    _completionFields.focuse = true;
-    _completionFields.letf = contentLeft();
-    _completionFields.width =
-        _fields.fold(0, (a, b) => a > b.length ? a : b.length) + 3;
-    _completionFields.height = filterFileds.length + 1;
-    _completionFields.top = top - _completionFields.height;
-
-    for (var (i, field) in filterFileds.indexed) {
-      lib.writeAt(
-        _completionFields.contentTop(i),
-        _completionFields.contentLeft(),
-        field,
-      );
-    }
-
-    _completionFields.render(lib);
   }
 
   (Iterable<String>, Iterable<String>) _getStartAndEnd() {
