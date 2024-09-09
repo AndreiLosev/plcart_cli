@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/colorist.dart';
-import 'package:plcart_cli/src/tui/main_tiget_fields/forse_value.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/grep.dart';
 import 'package:plcart_cli/src/tui/main_tiget_fields/helpers.dart';
 import 'package:plcart_cli/src/tui/shadow_console.dart';
@@ -39,6 +39,9 @@ enum Screen {
 class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   final Console _console;
   final _consoleStream = StreamController<Iterable<String>>();
+  final _consoleSink = StreamController<String>();
+  final IErrorHandler _errorHandler;
+
   late final StreamSink<ForseValue> _tx;
   final _fieldsBuff = StringBuffer();
   final _sourceBuff = StringBuffer();
@@ -66,10 +69,24 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
     int top = 10,
     required String path,
     required Console console,
+    required IErrorHandler errorHandler,
   })  : _grep = Grep(path),
         _console = console,
+        _errorHandler = errorHandler,
         super(width, height, letf, top) {
-    _console.setChanels(_consoleStream.stream, null);
+    _console.setChanels(_consoleStream.stream, _consoleSink.sink);
+    _consoleSink.stream.listen((message) {
+      try {
+        final forceValue = ForseValue.parse(
+          _tasks[_cursorePosition],
+          message,
+          _taskFields,
+        );
+        _tx.add(forceValue);
+      } catch (e) {
+        _errorHandler.addError(e);
+      }
+    });
   }
 
   @override
@@ -107,8 +124,6 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
         _console.setKeyEvent(event);
       default:
     }
-
-    _tx.add(ForseValue());
   }
 
   @override

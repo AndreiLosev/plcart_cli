@@ -65,7 +65,10 @@ class Console extends Frame implements Interactive<String, Iterable<String>> {
           return;
         }
 
-        _senderProt.add(_buffer.join());
+        if (['=', 'add', 'remove'].any((e) => _buffer.join().contains(e))) {
+          _senderProt.add(_buffer.join());
+        }
+
       default:
     }
   }

@@ -6,6 +6,7 @@ import 'package:plcart_cli/src/client.dart';
 import 'package:plcart_cli/src/debug_client.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/data_column.dart';
+import 'package:plcart_cli/src/tui/error_handler.dart';
 import 'package:plcart_cli/src/tui/layout.dart';
 import 'package:plcart_cli/src/tui/main_tidget.dart';
 import 'package:plcart_cli/src/tui/tui_app.dart';
@@ -67,8 +68,13 @@ class Command {
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
     final console = Console();
+    final errorHandler = Errorhandler();
 
-    final main = MainTidget(path: _workDir, console: console);
+    final main = MainTidget(
+      path: _workDir,
+      console: console,
+      errorHandler: errorHandler,
+    );
 
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
     events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);

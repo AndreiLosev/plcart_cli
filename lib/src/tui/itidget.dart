@@ -18,3 +18,7 @@ abstract interface class IFlex {
   int get innerDataWidth;
   int get innerDataHeight;
 }
+
+abstract interface class IErrorHandler {
+  void addError(Object err);
+}

@@ -18,4 +18,5 @@ void main(List<String> args) {
   final t5 = "testSet[1][2][wasa][ig_or][1_2] add 25";
   final f1 = ForseValue.parse('testTask', t5, fields);
   print(f1.toMap());
+  print(ForseValue.fromMap(f1.toMap()).toMap());
 }

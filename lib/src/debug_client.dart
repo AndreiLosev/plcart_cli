@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:plcart_cli/src/client.dart';
 import 'package:plcart_cli/src/tui/data_column.dart';
-import 'package:plcart_cli/src/tui/main_tidget.dart';
 
 enum TypeTiget {
   task,
   event,
   disableTask,
   taskStart,
-  eventStart;
+  eventStart,
 }
 
 class Request {
@@ -60,11 +59,16 @@ class DebugClient {
       };
       log(['write:', com.kind, e]);
       _client.write(com, id);
-      final type = com.kind == CommandKind.subscribeTask ? TypeTiget.task : TypeTiget.disableTask;
+      final type = com.kind == CommandKind.subscribeTask
+          ? TypeTiget.task
+          : TypeTiget.disableTask;
       _requests[id] = Request(type, e.name);
     });
 
-    mainTx.stream.listen((e) {});
+    mainTx.stream.listen((e) {
+      _client.write(
+          ClientCommand(CommandKind.setTaskValue, SetTaskValuePayload(e)));
+    });
   }
 
   Future<void> start() async {
@@ -74,16 +78,24 @@ class DebugClient {
       id,
     );
 
-    _requests[id] = Request(TypeTiget.taskStart, ''); 
-    log(['write', CommandKind.getRegisteredTasks, {'id': id}]);
+    _requests[id] = Request(TypeTiget.taskStart, '');
+    log([
+      'write',
+      CommandKind.getRegisteredTasks,
+      {'id': id}
+    ]);
 
     id = _getRequestId();
     _client.write(
       ClientCommand(CommandKind.getRegisteredEvents, null),
       id,
     );
-    log(['write', CommandKind.getRegisteredEvents, {'id': id}]);
-    _requests[id] = Request(TypeTiget.eventStart, ''); 
+    log([
+      'write',
+      CommandKind.getRegisteredEvents,
+      {'id': id}
+    ]);
+    _requests[id] = Request(TypeTiget.eventStart, '');
   }
 
   Future<void> listen() async {
@@ -120,8 +132,8 @@ class DebugClient {
           taskRx.add(Message.response("${req.data}::$postfix"));
         case TypeTiget.event:
           eventRx.add(Message.response("${req.data}::$postfix"));
-      case TypeTiget.disableTask:
-        taskRx.add(Message.response("${req.data}::desable"));
+        case TypeTiget.disableTask:
+          taskRx.add(Message.response("${req.data}::desable"));
       }
     }
   }
