@@ -27,6 +27,7 @@ class StyleResult {
 
 class StyleSearcher {
   List<StyleResult> search(String str) {
+    //TODO: handled syble "m"
     final regexp = RegExp("[0-9]{1,2}m");
     final stylesList = str.split("${ansi.CSI}0m");
 
@@ -46,7 +47,9 @@ class StyleSearcher {
     final result = <StyleResult>[];
 
     for (var (i, s) in stylesList.indexed) {
-      if (stylesStart[i] == null || stylesEnd[i] == null) {
+      if (stylesStart[i] == null ||
+          stylesEnd[i] == null ||
+          stylesStart[i]! > stylesEnd[i]!) {
         result.add(StyleResult(s));
         continue;
       }

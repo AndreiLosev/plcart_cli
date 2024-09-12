@@ -162,16 +162,16 @@ packages:
     dependency: transitive
     description:
       name: dart_style
-      sha256: "99e066ce75c89d6b29903d788a7bb9369cf754f7b24bf70bf4b6d6d6b26853b9"
+      sha256: "7856d364b589d1f08986e140938578ed36ed948581fbc3bc9aef1805039ac5ab"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.6"
+    version: "2.3.7"
   debug_server_utils:
     dependency: "direct main"
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "2e53eb00f1beb79816d0db1b2244d422016a7a55"
+      resolved-ref: "17af9cfb01588b405551671f2fa58642d95269ec"
       url: "git@github.com:AndreiLosev/plcart_debug_server_utils.git"
     source: git
     version: "1.0.0"

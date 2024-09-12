@@ -10,6 +10,7 @@ enum TypeTiget {
   disableTask,
   taskStart,
   eventStart,
+  setTaskValue;
 }
 
 class Request {
@@ -66,8 +67,11 @@ class DebugClient {
     });
 
     mainTx.stream.listen((e) {
+      final id = _getRequestId();
       _client.write(
-          ClientCommand(CommandKind.setTaskValue, SetTaskValuePayload(e)));
+          ClientCommand(CommandKind.setTaskValue, SetTaskValuePayload(e)), id);
+
+      _requests[id] = Request(TypeTiget.setTaskValue, e.toMap().toString());
     });
   }
 
@@ -119,7 +123,12 @@ class DebugClient {
         _ => 'desable',
       };
 
-      switch (req!.tiget) {
+      if (req == null) {
+        throw UnimplementedError(
+            'unhadled req = null and response status error');
+      }
+
+      switch (req.tiget) {
         case TypeTiget.taskStart:
           for (var item in response.message['registeredTasks'] as List) {
             taskRx.add(Message.data(item));
@@ -134,6 +143,8 @@ class DebugClient {
           eventRx.add(Message.response("${req.data}::$postfix"));
         case TypeTiget.disableTask:
           taskRx.add(Message.response("${req.data}::desable"));
+        case TypeTiget.setTaskValue:
+        // TODO:
       }
     }
   }

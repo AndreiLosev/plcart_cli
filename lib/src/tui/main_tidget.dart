@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
+import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
@@ -258,7 +259,6 @@ class MainTidget extends Frame implements Interactive<ForseValue, Map> {
   void _listen(e) async {
     _fieldsBuff.clear();
     _sourceBuff.clear();
-
     _setExtroCursorPosition(e);
     _tasks = (e as Map).keys.cast<String>().toList();
     final (selectedTask, activeTask, taskFields) = _current(e);
