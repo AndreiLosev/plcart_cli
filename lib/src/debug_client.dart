@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:plcart_cli/src/client.dart';
+import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/data_column.dart';
 
 enum TypeTiget {
@@ -158,8 +159,9 @@ class DebugClient {
   }
 
   void _write(ClientCommand command, [int id = 0]) {
+    flog([command.kind, command.payload]);
     try {
-      _write(command, id);
+      _client.write(command, id);
     } catch (e) {
       errorHandlerRx.add(e);
     }
