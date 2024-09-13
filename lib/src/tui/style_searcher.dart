@@ -1,5 +1,8 @@
 import 'package:termansi/termansi.dart' as ansi;
 
+final _regexp = RegExp("[0-9]{1,2}m");
+final _endStyle = "${ansi.CSI}0m";
+
 class StyleResult {
   final String? style;
   final String text;
@@ -27,9 +30,7 @@ class StyleResult {
 
 class StyleSearcher {
   List<StyleResult> search(String str) {
-    //TODO: handled syble "m"
-    final regexp = RegExp("[0-9]{1,2}m");
-    final stylesList = str.split("${ansi.CSI}0m");
+    final stylesList = str.split(_endStyle);
 
     final stylesStart = stylesList
         .map((e) => e.indexOf(ansi.CSI))
@@ -37,11 +38,15 @@ class StyleSearcher {
         .toList();
 
     final stylesEnd = stylesList.indexed.map((e) {
-      if (stylesStart[e.$1] == -1) {
+      if (stylesStart[e.$1] == null) {
         return null;
       }
-
-      return regexp.firstMatch(e.$2)?.end;
+      final start = stylesStart[e.$1]!;
+      final result = _regexp.firstMatch(e.$2.substring(start));
+      if (result == null) {
+        return null;
+      }
+      return result.end + start;
     }).toList();
 
     final result = <StyleResult>[];
