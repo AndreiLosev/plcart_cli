@@ -79,6 +79,7 @@ class Command {
     tasks.setChanels(debugClient.taskRx.stream, debugClient.taskTx.sink);
     events.setChanels(debugClient.eventRx.stream, debugClient.eventTx.sink);
     main.setChanels(debugClient.mainRx.stream, debugClient.mainTx.sink);
+    errorHandler.setChanels(debugClient.errorHandlerRx.stream, null);
 
     final app = TuiApp()
       ..addTiget(tasks)

@@ -37,6 +37,8 @@ class DebugClient {
 
   final consoleRx = StreamController<String>();
 
+  final errorHandlerRx = StreamController<Object>();
+
   DebugClient(this._client);
 
   void subscribe() {
@@ -44,8 +46,8 @@ class DebugClient {
       final id = _getRequestId();
       final com =
           ClientCommand(CommandKind.runEvent, RunEventPayload(e.name, [], {}));
-      log(['write:', CommandKind.runEvent, e]);
-      _client.write(com, id);
+
+      _write(com, id);
       _requests[id] = Request(TypeTiget.event, e.name);
     });
 
@@ -58,8 +60,7 @@ class DebugClient {
         false => ClientCommand(
             CommandKind.unsubscribeTask, SimplePayload({'value': e.name})),
       };
-      log(['write:', com.kind, e]);
-      _client.write(com, id);
+      _write(com, id);
       final type = com.kind == CommandKind.subscribeTask
           ? TypeTiget.task
           : TypeTiget.disableTask;
@@ -68,7 +69,7 @@ class DebugClient {
 
     mainTx.stream.listen((e) {
       final id = _getRequestId();
-      _client.write(
+      _write(
           ClientCommand(CommandKind.setTaskValue, SetTaskValuePayload(e)), id);
 
       _requests[id] = Request(TypeTiget.setTaskValue, e.toMap().toString());
@@ -77,28 +78,19 @@ class DebugClient {
 
   Future<void> start() async {
     var id = _getRequestId();
-    _client.write(
+    _write(
       ClientCommand(CommandKind.getRegisteredTasks, null),
       id,
     );
 
     _requests[id] = Request(TypeTiget.taskStart, '');
-    log([
-      'write',
-      CommandKind.getRegisteredTasks,
-      {'id': id}
-    ]);
 
     id = _getRequestId();
-    _client.write(
+    _write(
       ClientCommand(CommandKind.getRegisteredEvents, null),
       id,
     );
-    log([
-      'write',
-      CommandKind.getRegisteredEvents,
-      {'id': id}
-    ]);
+
     _requests[id] = Request(TypeTiget.eventStart, '');
   }
 
@@ -106,12 +98,6 @@ class DebugClient {
     while (_client.isConnected()) {
       final response = await _client.read();
       final req = _requests.remove(response.id);
-
-      log(['read:', response.responseStatus, response.id, response.message]);
-
-      if (response.responseStatus != ResponseStatus.ok) {
-        consoleRx.add(response.message.toString());
-      }
 
       if (req == null && response.responseStatus == ResponseStatus.ok) {
         mainRx.add(response.message);
@@ -171,9 +157,11 @@ class DebugClient {
     _client.disconnect();
   }
 
-  void log(Object mess) {
-    if (verbose) {
-      consoleRx.add(mess.toString());
+  void _write(ClientCommand command, [int id = 0]) {
+    try {
+      _write(command, id);
+    } catch (e) {
+      errorHandlerRx.add(e);
     }
   }
 }
