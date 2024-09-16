@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:plcart_cli/src/client.dart';
-import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/data_column.dart';
 
 enum TypeTiget {
@@ -25,7 +24,6 @@ class DebugClient {
   late final Client _client;
   final _requests = <int, Request>{};
   int _requestId = 0;
-  bool verbose = false;
 
   final eventRx = StreamController<Message>();
   final eventTx = StreamController<SendMessage>();
@@ -111,8 +109,8 @@ class DebugClient {
       };
 
       if (req == null) {
-        throw UnimplementedError(
-            'unhadled req = null and response status error');
+        errorHandlerRx.add(response.message);
+        continue;
       }
 
       switch (req.tiget) {
@@ -159,7 +157,6 @@ class DebugClient {
   }
 
   void _write(ClientCommand command, [int id = 0]) {
-    flog([command.kind, command.payload]);
     try {
       _client.write(command, id);
     } catch (e) {

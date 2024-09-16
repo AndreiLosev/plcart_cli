@@ -16,7 +16,7 @@ class Errorhandler implements IErrorHandler, Interactive<Object, Object> {
   }
 
   @override
-  void setChanels(Stream<Object> rx, StreamSink<Object>? tx) {
+  void setChanels(Stream<Object> rx, _) {
     rx.listen((e) => flog(e));
   }
 }

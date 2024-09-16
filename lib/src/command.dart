@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:path/path.dart';
 import 'package:plcart_cli/src/client.dart';
 import 'package:plcart_cli/src/debug_client.dart';
@@ -64,7 +65,6 @@ class Command {
     final soket = await Socket.connect(_host, 11223);
     final client = Client(soket);
     final debugClient = DebugClient(client);
-    debugClient.verbose = false;
     final events = DataColumn(name: "Events", widthIndex: true);
     final tasks = DataColumn(name: 'Tasks', widthIndex: true);
     final console = Console();
@@ -94,5 +94,20 @@ class Command {
     debugClient.subscribe();
     await debugClient.start();
     await debugClient.listen();
+  }
+
+  Future<void> showErrors() async {
+    final soket = await Socket.connect(_host, 11223);
+    final client = Client(soket);
+    client.write(ClientCommand(CommandKind.getAllErrors, null));
+    final response = await client.read();
+    switch (response.responseStatus) {
+      case ResponseStatus.ok:
+        (response.message['err'] as Iterable).indexed.forEach(print);
+      default:
+        print({'statis': response.responseStatus, 'err': response.message});
+    }
+
+    await client.disconnect();
   }
 }
