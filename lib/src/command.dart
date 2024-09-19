@@ -85,7 +85,9 @@ class Command {
       ..addTiget(tasks)
       ..addTiget(events)
       ..addTiget(main)
-      ..addRednerCallback(() => Layout.applay(events, tasks, main, console))
+      ..addTiget(errorHandler)
+      ..addRednerCallback(
+          () => Layout.applay(events, tasks, main, console, errorHandler))
       ..addEndCallback(debugClient.stop);
 
     app.listen();

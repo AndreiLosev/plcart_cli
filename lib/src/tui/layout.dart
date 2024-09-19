@@ -1,11 +1,12 @@
 import 'dart:io';
 
 import 'package:plcart_cli/src/tui/data_column.dart';
+import 'package:plcart_cli/src/tui/error_handler.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 
 class Layout {
-  static void applay(
-      DataColumn events, DataColumn tasks, Frame main, Frame conosle) {
+  static void applay(DataColumn events, DataColumn tasks, Frame main,
+      Frame conosle, Errorhandler err) {
     final width = stdout.terminalColumns;
     final hieght = stdout.terminalLines;
 
@@ -14,16 +15,17 @@ class Layout {
     final h1 = tasks.innerDataHeight;
     final h2 = events.innerDataHeight;
     final taskHieght = (h1 * hieght / (h1 + h2)).round();
-    -2;
-    final eventHieght = hieght - taskHieght - 3;
+    final eventHieght = hieght - taskHieght - 6;
+
+    final rightColumnLeft = width - w - 2;
 
     tasks.top = 1;
-    tasks.left = width - w - 2;
+    tasks.left = rightColumnLeft;
     tasks.width = w;
     tasks.height = taskHieght;
 
-    events.top = hieght - eventHieght - 1;
-    events.left = width - w - 2;
+    events.top = hieght - eventHieght - 4;
+    events.left = rightColumnLeft;
     events.width = w;
     events.height = eventHieght;
 
@@ -36,5 +38,14 @@ class Layout {
     conosle.top = main.height + 1;
     conosle.width = width - tasks.width - 5;
     conosle.height = 2;
+
+    err.maxTop = (hieght * 0.07).toInt();
+    err.maxLeft = (w * 0.3).toInt();
+    err.maxWidth = width - err.maxLeft * 2;
+
+    err.minTop = events.top + events.height + 1;
+    err.minLeft = rightColumnLeft;
+    err.minWidth = w;
+    err.minHeight = 2;
   }
 }

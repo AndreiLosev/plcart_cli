@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
-import 'package:plcart_cli/src/logger.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/frame.dart';
 import 'package:plcart_cli/src/tui/itidget.dart';
