@@ -1,8 +1,6 @@
+import 'package:path/path.dart' as path;
+
 void main(List<String> args) {
-  final str = "hello_world";
-  print([
-    str.substring(0, 5),
-    str.substring(5, 10),
-    str.substring(10),
-  ]);
+  final x = '/home/andrei/documents/my/plcartProject/test1/';
+  print([path.dirname(x), path.basename(x)]);
 }

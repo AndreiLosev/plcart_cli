@@ -17,6 +17,8 @@ dependencies:
   termparser: ^0.3.0
   path: ^1.8.0
   yaml: ^3.1.2
+  args: ^2.7.0
+  dartssh2: ^2.13.0
 
 dev_dependencies:
   build_runner: ^2.4.11
