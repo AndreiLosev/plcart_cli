@@ -5,6 +5,12 @@ import 'package:args/args.dart';
 import 'package:yaml/yaml.dart';
 
 class ConfigBuilder {
+  static const debugCommnad = 'debug';
+  static const flashCommand = 'flash';
+  static const errorsCommad = 'errors';
+  static const buildCommand = 'build';
+  static const helpCommand = 'help';
+
   late final String workDir;
   late final String host;
   late final String os;
@@ -14,6 +20,7 @@ class ConfigBuilder {
   late final String sshName;
   late final String sshPassword;
   late final String sshKey;
+  late final Duration connTimeout;
 
   final _cliParser = ArgParser();
 
@@ -21,6 +28,13 @@ class ConfigBuilder {
   late ArgResults _cliArgs;
 
   ConfigBuilder() {
+    _cliParser
+      ..addCommand(debugCommnad)
+      ..addCommand(flashCommand)
+      ..addCommand(errorsCommad)
+      ..addCommand(buildCommand)
+      ..addCommand(helpCommand);
+
     _cliParser
       ..addOption('work-dir')
       ..addOption('host')
@@ -30,8 +44,11 @@ class ConfigBuilder {
       ..addOption('ssh-name')
       ..addOption('ssh-port')
       ..addOption('ssh-password')
+      ..addOption('conn-timeout')
       ..addOption('ssh-key');
   }
+
+  String? get command => _cliArgs.command?.name;
 
   Future<void> build(List<String> args) async {
     _cliArgs = _cliParser.parse(args);
@@ -48,6 +65,7 @@ class ConfigBuilder {
     sshPort = _getValue('ssh-port', '22');
     sshPassword = _getValue('ssh-password', '');
     sshKey = _getValue('ssh-key', '');
+    connTimeout = Duration(seconds: int.parse(_getValue('conn-timeout', '5')));
   }
 
   Future<Map<String, dynamic>> loadConfig() async {

@@ -2,27 +2,46 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:debug_server_utils/debug_server_utils.dart';
-import 'package:path/path.dart' as p;
 import 'package:plcart_cli/src/client.dart';
 import 'package:plcart_cli/src/config_builder.dart';
 import 'package:plcart_cli/src/debug_client.dart';
+import 'package:plcart_cli/src/flash_and_run.dart';
 import 'package:plcart_cli/src/tui/console.dart';
 import 'package:plcart_cli/src/tui/data_column.dart';
 import 'package:plcart_cli/src/tui/error_handler.dart';
 import 'package:plcart_cli/src/tui/layout.dart';
 import 'package:plcart_cli/src/tui/main_tidget.dart';
 import 'package:plcart_cli/src/tui/tui_app.dart';
-import 'package:yaml/yaml.dart';
 
 class Command {
   final _config = ConfigBuilder();
+  late final FlashAndRun _flashAndRun;
 
-  Command(List<String> args) {
-    _config.build(args);
+  Command();
+
+  Future<void> run(List<String> args) async {
+    await _config.build(args);
+    _flashAndRun = FlashAndRun(_config);
+    switch (_config.command) {
+      case ConfigBuilder.flashCommand:
+        await _flashAndRun.flash();
+      case ConfigBuilder.buildCommand:
+        await _flashAndRun.build();
+      case ConfigBuilder.debugCommnad:
+        await debug();
+      case ConfigBuilder.errorsCommad:
+        await showErrors();
+      default:
+        help();
+    }
   }
 
   Future<void> debug() async {
-    final soket = await Socket.connect(_config.host, 11223);
+    final soket = await Socket.connect(
+      _config.host,
+      11223,
+      timeout: _config.connTimeout,
+    );
     final client = Client(soket);
     final debugClient = DebugClient(client);
     final events = DataColumn(name: "Events", widthIndex: true);
@@ -60,7 +79,11 @@ class Command {
   }
 
   Future<void> showErrors() async {
-    final soket = await Socket.connect(_config.host, 11223);
+    final soket = await Socket.connect(
+      _config.host,
+      11223,
+      timeout: _config.connTimeout,
+    );
     final client = Client(soket);
     client.write(ClientCommand(CommandKind.getAllErrors, null));
     final response = await client.read();
@@ -72,5 +95,9 @@ class Command {
     }
 
     await client.disconnect();
+  }
+
+  void help() {
+    print('help message');
   }
 }

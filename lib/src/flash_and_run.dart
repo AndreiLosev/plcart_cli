@@ -1,16 +1,15 @@
 import 'dart:io';
 
 import 'package:dartssh2/dartssh2.dart';
-import 'package:debug_server_utils/debug_server_utils.dart';
 import 'package:path/path.dart' as p;
 import 'package:plcart_cli/src/config_builder.dart';
 
-class FillAndRun {
+class FlashAndRun {
   final ConfigBuilder _config;
   late final String _buildDir;
   late final _binName = p.basename(_config.workDir);
 
-  FillAndRun(this._config) {
+  FlashAndRun(this._config) {
     _buildDir = "${_config.workDir}/build";
   }
 
@@ -18,6 +17,7 @@ class FillAndRun {
     if (!await Directory(_buildDir).exists()) {
       await Directory(_buildDir).create();
     }
+
     final params = [
       'compile',
       'exe',
@@ -33,9 +33,9 @@ class FillAndRun {
     }
   }
 
-  Future<void> fill([FillType type = FillType.ssh]) async {
+  Future<void> flash([FlashType type = FlashType.ssh]) async {
     switch (type) {
-      case FillType.ssh:
+      case FlashType.ssh:
       default:
         throw Exception('unsuported fill type $type');
     }
@@ -98,4 +98,4 @@ class FillAndRun {
   }
 }
 
-enum FillType { local, ssh, docker }
+enum FlashType { local, ssh, docker }

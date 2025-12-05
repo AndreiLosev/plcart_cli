@@ -24,3 +24,10 @@ dev_dependencies:
   build_runner: ^2.4.11
   lints: ^3.0.0
   test: ^1.24.0
+
+plcart:
+  host: 11.12.13.205
+  ssh-name: wasa123
+  ssh-port: 2200
+  ssh-password: wasa333
+  ssh-key: ~/.ssh/new-main
