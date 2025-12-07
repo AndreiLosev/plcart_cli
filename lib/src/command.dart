@@ -98,6 +98,12 @@ class Command {
   }
 
   void help() {
-    print('help message');
+    print("    ");
+    print("    ${ConfigBuilder.debugCommnad} - run debug mode");
+    print("    ${ConfigBuilder.flashCommand} - компиояция и прошивка");
+    print("    ${ConfigBuilder.buildCommand} - Компиляция");
+    print("    ${ConfigBuilder.errorsCommad} - показать ошибки");
+    print("    ${ConfigBuilder.helpCommand} - показать это сообщение");
+    print("параметры по умолчанию: $_config");
   }
 }
